@@ -37,7 +37,7 @@ export function r125BlockPaletteSchema(){
  return {type:'object',additionalProperties:false,minProperties:1,
   properties:Object.fromEntries(roles.map(r=>[r,{type:'string',enum:choices(r)}]))};
 }
-const instruction='OPTIONAL blockPalette: choose actual full blocks for floor, wall, roof, trim (existing piers/fins/frame) and furniture (wood parts only). Omit unused roles. Allowed IDs: '+opaque.join('|')+'. Furniture: planks only. Optional windowFrame: existing wall cells immediately around real exterior windows; storage: bookshelf or planks on existing shelf parts only. Use these if relevant; coherent contrast is optional, never mandatory. Keep materials as the required B143 coarse geometry palette; blockPalette is your explicit visual choice, never changes geometry, glass or light. Do not invent extra blocks or features.';
+const instruction='OPTIONAL blockPalette: choose actual full blocks for floor, wall, roof, trim (existing piers/fins/frame) and furniture (wood parts only). Omit unused roles. Allowed IDs: '+opaque.join('|')+'. Furniture: planks only. Optional windowFrame: existing wall cells immediately around real exterior windows; storage: bookshelf or planks on existing shelf parts only. Use these if relevant; coherent contrast is optional, never mandatory. Keep materials as the required B143 coarse geometry palette; blockPalette is your explicit visual choice, never changes geometry, glass or light. Do not invent extra blocks or features. Optional windowRelief: hoods (one-block projecting lintel) or surrounds (projecting head, sill and jambs), placed only at feasible existing exterior windows with solid backing and clear outside; at least one must fit. Omit if not appropriate; no new openings.';
 export function prepareR125BlockPaletteRequest(body){
  if(!obj(body)||!Array.isArray(body.messages)||body.messages[0]?.role!=='system'||
     typeof body.messages[0].content!=='string'||body.messages[0].content.includes('OPTIONAL blockPalette:'))
@@ -50,6 +50,8 @@ export function prepareR125BlockPaletteRequest(body){
  for(const variant of schema.anyOf){
   if(!obj(variant.properties)||Object.hasOwn(variant.properties,'blockPalette'))fail('VARIANT');
   variant.properties.blockPalette=r125BlockPaletteSchema();
+  if(Object.hasOwn(variant.properties,'windowRelief'))fail('RELIEF_VARIANT');
+  variant.properties.windowRelief={type:'string',enum:['hoods','surrounds']};
  }
  next.messages[0].content+='\n'+instruction;
  return next;
@@ -85,6 +87,7 @@ export function r125ElementRole(e){
  if(/^(?:fx-l\d+-z\d+|host-scale-fx-l\d+-z\d+)-/.test(id))
   return m==='wood'?'furniture':null;
  if(/^(?:floor-\d+|space-\d+-floor|interfloor-stair|recess-paved-court-floor|u-court-paving|front-court-paving|detail-covered-entry-landing|detail-entry-paving)$/.test(id))return 'floor';
+ if(/^relief-window-\d+-(?:head|sill|left|right)$/.test(id))return 'trim';
  if(/^(?:l\d+-(?:fin|screen)-\d+|space-\d+-front-pier-\d+|entry-portal-pier-\d+|entry-portal-lintel|entry-canopy-support-(?:left|right)|detail-covered-entry-pier-\d+|spatial-daylight-bay-\d+-(?:left-fin|right-fin|sill|head)|portico-front-spandrel)$/.test(id))return 'trim';
  if(/^(?:l\d+-(?:west|east|front|rear|divider|secondary-divider|(?:rear|side)-divider-\d+|recess-(?:west|east|rear)-wall)|space-\d+-(?:west|east|front|rear|shed-riser-\d+|(?:ridge|shed|gable)-gable-\d+-\d+|shed-high-end)|roof-monitor-riser-.+|roof-raised-eave-[ab]-\d+|roof-raised-terminal-gable|roof-hip-inner-(?:front|rear|west|east)|portico-(?:west-return|east-return|rear-wall)|u-court-(?:return-west|return-east|interior-wall)|front-court-(?:side|inner)-wall|recess-outer-roof-seal-[xz]-\d+|detail-entry-(?:return|back)-\d+|(?:deep-east|deep-rear|front-terrace)-parapet-.+)$/.test(id))return 'wall';
  if(/^(?:roof|roof-base|roof-monitor-(?:low|high)|roof-one-cell-eave-.+|roof-raised-skin-.+|roof-tapered-riser-\d+|roof-profile-\d+|roof-pitched-eave-.+|roof-hip-(?:\d+-(?:front|rear|west|east)|ridge|eave-.+)|space-\d+-(?:roof|(?:ridge|shed|gable)-skin-\d+|gable-riser-\d+)|entry-canopy-roof|detail-covered-entry-canopy|detail-entry-canopy|detail-eave-.+)$/.test(id))return 'roof';
@@ -98,7 +101,7 @@ function windowFrameCells(scene,elements,owners){
  const byKey=new Map(scene.primitives.map((p,i)=>[key(p),i])),out=new Set();
  for(let i=0;i<owners.length;i++){
   const e=elements.get(owners[i]);
-  if(e.material!=='glass'||!e.id.match(/^(?:l\d+-(?:window-|recess-.*-window-)|daylight-|spatial-daylight-|front-court-return-window-|u-court-window-)/))continue;
+  if(e.material!=='glass'||!e.id.match(/^(?:l\d+-(?:window-|recess-.*-window-)|daylight-|glaze-\d+(?:-\d+)?-glass$|spatial-daylight-|front-court-return-window-|u-court-window-)/))continue;
   if(e.shape!=='box'||!e.size)continue;
   const axis=e.size[0]===1&&e.size[2]>1?0:e.size[2]===1&&e.size[0]>1?2:null;
   if(axis===null)continue; // ambiguous 1x1 panes remain untouched
@@ -138,7 +141,7 @@ export function buildR125BlockExpression({design,scene,palette,origin='HOST_COMP
  // semantic role or null, selected concrete candidate (null = no override).
  const rows=scene.primitives.map((p,i)=>{
   const owner=owners[i],element=elements.get(owner);
-  const role=frames.has(i)?'windowFrame':Object.hasOwn(palette,'storage')&&storagePart(element)?'storage':r125ElementRole(element);
+  const role=(frames.has(i)||(Object.hasOwn(palette,'windowFrame')&&/^relief-window-\d+-/.test(owner)))?'windowFrame':Object.hasOwn(palette,'storage')&&storagePart(element)?'storage':r125ElementRole(element);
   const baseline=legacy[MATERIALS[p[3]]],block=role?palette[role]??null:null;
   if(role){coverage[role].eligible++;
    if(block){coverage[role].selected++;if(block!==baseline)coverage[role].changed++;}
