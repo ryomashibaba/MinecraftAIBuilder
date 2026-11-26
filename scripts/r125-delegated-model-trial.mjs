@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {normalizeR125SpatialTreeResponse} from '../source/ai/b198g-local-model-adapter.mjs';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {resolveR125DelegatedDimensions} from './r125-delegated-dimensions-study.mjs';
+import {resolveR125DelegatedRoomFit,r125RoomFitSchema} from './r125-delegated-room-fit.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {prepareR125BlockPaletteRequest,buildR125BlockExpression,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
@@ -19,7 +20,7 @@ const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const FIELD='delegatedDimensions';
 // V37.3: compact map of explicitly permitted alternative values. The
 // baseline is already in the plan; never ask the model to repeat it.
-const instruction='OPTIONAL DIMENSION DELEGATION (single floor only): Keep the ordinary architecture JSON. For spatial-tree with no user-fixed site dimensions, prefer delegatedDimensions:{"siteFit":true} when the site is merely a calculated envelope: HOST may increase ONLY footprint.width/depth to exact compiler-required minima (max 32); room sizes, positions relative to one another, windows and equipment stay fixed. siteFit is used alone, not with other alternatives. If useful, add delegatedDimensions as an object, e.g. {"width":[24,28],"split":[45,55]}. Keys are dimensions; arrays list 1..4 acceptable alternatives to the value already in your plan. HOST tries the original value first, then only these alternatives. Use at most four keys. width/depth = footprint (16..32); split = main partition (30..70 step 5); secondary = declared three-room secondary partition (25..75 step 5). For spatial-tree only: r0Width/r0Depth through r3Width/r3Depth (6..14) and r1Shift through r3Shift (-3..3), r0=rootSpace, others=attachedSpaces in order. Do not delegate user-fixed measurements. Keep all non-dimensional choices explicit. Omit this object for exact dimensions or two floors. For spatial-tree, keep both center cells of the root FRONT (small z) wall exterior: no other volume may occupy them, including a chain of attached rooms. A larger site alone does not clear a blocked entrance. Return one JSON object.';
+const instruction='OPTIONAL DIMENSION DELEGATION (single floor only): Keep the ordinary architecture JSON. For spatial-tree with no user-fixed site dimensions, prefer delegatedDimensions:{"siteFit":true} when the site is merely a calculated envelope: HOST may increase ONLY footprint.width/depth to exact compiler-required minima (max 32); room sizes, positions relative to one another, windows and equipment stay fixed. For spatial-tree, roomFit permits increasing up to two room dimensions to author-selected maxima (6..14), e.g. delegatedDimensions:{"roomFit":{"r0Width":10,"r0Depth":12},"siteFit":true}. HOST searches small increases only if window or fixture placement fails in that room. siteFit may accompany roomFit, but neither mixes with numeric alternative arrays. Never delegate user-fixed dimensions. If useful, add delegatedDimensions as an object, e.g. {"width":[24,28],"split":[45,55]}. Keys are dimensions; arrays list 1..4 acceptable alternatives to the value already in your plan. HOST tries the original value first, then only these alternatives. Use at most four keys. width/depth = footprint (16..32); split = main partition (30..70 step 5); secondary = declared three-room secondary partition (25..75 step 5). For spatial-tree only: r0Width/r0Depth through r3Width/r3Depth (6..14) and r1Shift through r3Shift (-3..3), r0=rootSpace, others=attachedSpaces in order. Do not delegate user-fixed measurements. Keep all non-dimensional choices explicit. Omit this object for exact dimensions or two floors. For spatial-tree, keep both center cells of the root FRONT (small z) wall exterior: no other volume may occupy them, including a chain of attached rooms. A larger site alone does not clear a blocked entrance. Return one JSON object.';
 const dimensions={
  width:['footprint.width',16,32],depth:['footprint.depth',16,32],
  split:['levels.0.splitPercent',30,70,5],
@@ -38,7 +39,7 @@ function delegationSchema(spatial){
   return [k,{type:'array',minItems:1,maxItems:4,items:{
    type:'integer',minimum,maximum,...(step?{multipleOf:step}:{})}}];
  }));
- if(spatial)properties.siteFit={type:'boolean',enum:[true]};
+ if(spatial){properties.siteFit={type:'boolean',enum:[true]};properties.roomFit=r125RoomFitSchema();}
  return {type:'object',additionalProperties:false,minProperties:1,maxProperties:4,
   properties};
 }
@@ -195,6 +196,14 @@ export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16
  const normalized=normalizeR125SpatialTreeResponse(JSON.stringify(plan));
  // The solver receives canonical ordered spaces and can change only numeric
  // values explicitly listed by the model. No HOST observation repair.
+ if(object(delegated)&&Object.hasOwn(delegated,'roomFit')){
+  const result=resolveR125DelegatedRoomFit(normalized.plan,delegated,requestedBrief,
+   p=>diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),{requestedBrief}),{maxCandidates});
+  return {...result,originalSha256,delegationSelected:true,
+   delegationContract:{format:'room-fit',...clone(delegated)},wireNormalization:normalized.normalization,
+   baselinePlanSha256:sha(JSON.stringify(normalized.plan)),
+   ...(result.candidate?{resolvedPlanSha256:sha(JSON.stringify(result.candidate))}:{})};
+ }
  if(object(delegated)&&Object.hasOwn(delegated,'siteFit')){
   if(delegated.siteFit!==true||Object.keys(delegated).length!==1)fail('SITE_FIT_STANDALONE');
   const result=resolveR125DelegatedSiteFit(normalized.plan,requestedBrief,
