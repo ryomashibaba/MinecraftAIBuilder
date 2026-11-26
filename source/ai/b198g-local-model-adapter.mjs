@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import {inferR125ExplicitActivityRequirements}
  from './r125-explicit-activity-requirements.mjs';
 import {validateArchitecturePlan,SCHEMA as R125_PLAN_SCHEMA} from './r125-architecture-plan.mjs';
+import {prepareR125BlockPaletteRequest,constrainR125RoofSurfaceChoices} from './r125-block-expression.mjs';
 /**
  * B198G optional LOCAL-only OpenAI-compatible chat completion adapter.
  * The model actually authors JSON B143 source. NO API key, no paid endpoint,
@@ -584,7 +585,27 @@ export function r125RequiresWorkObservation(prompt){
   /(?:組立|組み立て|製作|制作|点検|作業).{0,48}(?:ガラス|窓).{0,48}(?:見学|見学でき|見える|見る|観察)|(?:ガラス|窓).{0,48}(?:組立|組み立て|製作|制作|点検|作業).{0,48}(?:見学|見学でき|見える|見る|観察)|(?:組立|組み立て|製作|制作|点検|作業).{0,24}(?:見学|観察|見える).{0,32}(?:作業|様子|工程)/i.test(prompt);
 }
 
-export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false,spatialTreeOnly=false}={}){
+/** Revision preserves access to previously authored extensions, not a
+ * requirement to keep every decoration when the author redesigns. */
+export function r125RevisionResponseFormat(format,previous,{observationRequired=false}={}){
+ if(format?.type!=='json_schema')return format;
+ const next=structuredClone(format),schema=next.json_schema.schema;
+ const allowedObservation=observationRequired||Object.hasOwn(previous,'observationLink');
+ if(!allowedObservation)for(const v of schema.anyOf)delete v.properties.observationLink;
+ const extensions=['blockPalette','windowRelief','wallRelief','roofSurface'];
+ const allowed=extensions.filter(k=>Object.hasOwn(previous,k));
+ if(!allowed.length)return next;
+ if(allowed.includes('roofSurface')&&!allowed.includes('blockPalette'))refuse('REVISION_ROOF_PALETTE_REQUIRED');
+ // Use the same catalog as fresh generation, but do not add unrelated
+ // choices to this revision or alter the archived author plan.
+ const prepared=prepareR125BlockPaletteRequest({response_format:next,messages:[{role:'system',content:'Revision extension choices'}]});
+ const result=prepared.response_format;
+ for(const v of result.json_schema.schema.anyOf)
+  for(const k of extensions)if(!allowed.includes(k))delete v.properties[k];
+ if(allowed.includes('roofSurface'))constrainR125RoofSurfaceChoices(result.json_schema.schema);
+ return result;
+}
+export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false,spatialTreeOnly=false,revisionBase=null}={}){
  if(endpoint==='http://127.0.0.1:11434/v1/chat/completions'){
   const schema=structuredClone(R125_ARCHITECTURE_RESPONSE_SCHEMA);
   if(spatialTreeOnly)schema.anyOf=[schema.anyOf[0]];
@@ -603,8 +624,9 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
     }
    }
   }
-  return {type:'json_schema',json_schema:{
+  const format={type:'json_schema',json_schema:{
    name:'r125_architecture_plan_v11',strict:true,schema}};
+  return revisionBase===null?format:r125RevisionResponseFormat(format,revisionBase,{observationRequired});
  }
  return {type:'json_object'};
 }
@@ -707,7 +729,8 @@ onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.55,
      response_format:r125ResponseFormatForEndpoint(endpoint,{
-      observationRequired:r125RequiresWorkObservation(prompt),spatialTreeOnly}),max_tokens:maxOutputTokens,
+      observationRequired:r125RequiresWorkObservation(prompt),spatialTreeOnly,
+      revisionBase:revisionContext?.previousArchitecturePlan??null}),max_tokens:maxOutputTokens,
      ...(reasoningEffort===undefined?{}:{reasoning_effort:reasoningEffort}),
      messages:[{role:'system',content:revisionSystem},
       {role:'user',content:JSON.stringify({
@@ -718,6 +741,9 @@ onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
        essentialTaskPlacementRule:'最優先: requiredFixtureRoles の全設備を必ず部屋の fixtures 配列に明記する。例えば組立と点検が同じ作業室なら fixtures:["assembly-table","inspection-stand"] とし、workbench だけでは代用不可。展示はdisplay、記録はdesk、広げて見る海図はlarge-table。必須設備を先に部屋へ割り当て、その部屋に十分な面積と2ブロック幅の利用経路を確保してから屋根・外観を設計する。fixtureScale は出力禁止。設備を勝手に省いたり、職員室を通る公開経路にしない。',
        observationRelationRule:r125RequiresWorkObservation(prompt)?
         'REQUIRED BY THIS BRIEF: include observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a real work fixture. HOST cuts actual 2x2 internal glass and proves reachable public standing access plus a clear ray to that fixture. Do not claim an unverified view; impossible geometry must remain SOURCE HOLD.':
+        revisionContext&&Object.hasOwn(revisionContext.previousArchitecturePlan,'observationLink')?
+        'Preserve the useful previously authored work-view relation when still required by the project; update its room IDs if needed. Do not invent unrelated viewing relations.':
+        revisionContext?'Omit observationLink: no explicit work-view request or previous work-view relation is present.':
         allowDelegatedDimensions?'Omit observationLink unless the original request explicitly calls for visitors to watch actual staff work through an internal boundary. Ordinary shared/public rooms, bookshelves, displays, kitchens, natural light and views do not imply this relation. If explicitly requested, use adjacent same-floor public/shared viewer and staff/shared work room with a real work fixture. Otherwise use ordinary daylight and access fields.':
         'If visitors must watch actual staff WORK, not just view an exhibit, choose optional observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a work fixture. HOST cuts a real 2x2 internal glass panel and proves visitor standing access and a clear ray to work equipment; impossible choices HOLD. No automatic doors or false visibility claims. Omit for display-only requests.',
        architecturalRequest:prompt,
@@ -736,6 +762,7 @@ onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
        ...(revisionContext?{
         previousArchitecturePlan:revisionContext.previousArchitecturePlan,
         revisionRequest:revisionContext.revisionRequest,
+        revisionFeatureRule:'Preserve useful material and architectural intent from the previous plan. Previously selected blockPalette, windowRelief, wallRelief and roofSurface may be retained or changed when supported by the response schema; they are not mandatory ornaments. Do not silently remove user-required functions. Review-only block shapes are not proof of construction.',
         ...(revisionContext.sourceDiagnosis?{
          previousSourceDiagnosis:revisionContext.sourceDiagnosis,
          sourceDiagnosisRule:'Use this exact compiler diagnosis to correct the model-authored plan. No HOST geometry edits; no SOURCE pass claims.'
