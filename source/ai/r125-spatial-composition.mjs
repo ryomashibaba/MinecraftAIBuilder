@@ -6,6 +6,7 @@
  */
 import {createHash} from 'node:crypto';
 import {taperedR125RidgeHeight} from './r125-roof-profiles.mjs';
+import {addR125HipRoof} from './r125-hip-roof.mjs';
 import {SCHEMA as B143,compileDesign,verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r125-spatial-composition-v1';
@@ -57,7 +58,7 @@ export function validateSpatialComposition(p){
     (r.facadeRelief!=='front-piers'||r.spatialUse==='open-court'))||
    (r.roofForm===undefined&&r.roofAxis!==undefined)||
    (r.roofForm!==undefined&&
-    (!['ridge','shed','gable'].includes(r.roofForm)||!['x','z'].includes(r.roofAxis)||
+    (!['ridge','shed','gable','hip'].includes(r.roofForm)||!['x','z'].includes(r.roofAxis)||
      r.spatialUse==='open-court')))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
@@ -115,7 +116,7 @@ export function compileSpatialComposition(value){
   wall:d.wall+(d.axis==='z'?sx:sz),
   along:d.along+(d.axis==='z'?sz:sx)}));
  const bounds={width:Math.max(...rooms.map(maxX))+3,
-  height:Math.max(...rooms.map(r=>r.roofY+(r.roofForm==='gable'?4:2)))+1,
+  height:Math.max(...rooms.map(r=>r.roofY+(['gable','hip'].includes(r.roofForm)?4:2)))+1,
   depth:Math.max(...rooms.map(maxZ))+3};
  if(bounds.width>128||bounds.depth>128)fail('BOUNDS');
  const elements=[],mat=plan.materials;
@@ -133,7 +134,13 @@ export function compileSpatialComposition(value){
   box(tag+'-front','add',mat.wall,[r.x+1,2,r.z],[r.width-2,height,1]);
   box(tag+'-rear','add',mat.wall,[r.x+1,2,maxZ(r)],[r.width-2,height,1]);
   if(r.spatialUse!=='open-court'){
-   if(['ridge','shed','gable'].includes(r.roofForm)){
+   if(r.roofForm==='hip'){
+    // Reuse the existing four-sided sealed roof generator. Its supported
+    // span is checked by the same helper; never replace an authored hip.
+    addR125HipRoof((id,mode,material,origin,size)=>box(tag+'-'+id,mode,material,origin,size),{
+     upper:{x0:r.x,x1:maxX(r),z0:r.z,z1:maxZ(r)},top:r.roofY,
+     roof:mat.roof,wall:mat.wall,roofAxis:r.roofAxis});
+   }else if(['ridge','shed','gable'].includes(r.roofForm)){
     // MODEL-authored roofs. Historic ridge elements stay unchanged.
     // Shed rises toward positive roofAxis and has a sealed high end.
     const axis=r.roofAxis,n=axis==='x'?r.width:r.depth;

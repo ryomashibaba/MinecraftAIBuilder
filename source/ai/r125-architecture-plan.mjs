@@ -469,7 +469,7 @@ export function validateArchitecturePlan(p){
      (volume.facadeRelief===undefined||
       (volume.facadeRelief==='front-piers'&&space.spatialUse!=='open-court'))&&
      ((volume.roofForm===undefined&&volume.roofAxis===undefined)||
-      (['ridge','shed','gable'].includes(volume.roofForm)&&['x','z'].includes(volume.roofAxis)&&
+      (['ridge','shed','gable','hip'].includes(volume.roofForm)&&['x','z'].includes(volume.roofAxis)&&
        space.spatialUse!=='open-court')),'SPATIAL_ROOM_VOLUME');
     if(seen.size===0){
      check(!Object.hasOwn(volume,'attach')&&['public','shared'].includes(space.access),

@@ -252,7 +252,7 @@ const r125Room=r125obj({
 },['id','purpose','access']);
 const r125SpatialVolumeProperties={
  width:r125int(6,14),depth:r125int(6,14),roofY:r125int(6,10),
- roofForm:r125enum('ridge','shed','gable'),roofAxis:r125enum('x','z'),
+ roofForm:r125enum('ridge','shed','gable','hip'),roofAxis:r125enum('x','z'),
  facadeRelief:r125enum('front-piers'),
  attach:r125obj({to:r125slug,side:r125enum('east','west','north','south'),
   shift:{type:'integer',minimum:-3,maximum:3}
@@ -264,10 +264,10 @@ const r125SpatialVolume=(attached)=>{
    key!=='roofForm'&&key!=='roofAxis'));
  const required=['width','depth','roofY',...(attached?['attach']:[])];
  const flat=r125obj(properties,required);
- const roofed=r125obj({...properties,roofForm:r125enum('ridge','shed','gable'),
+ const roofed=r125obj({...properties,roofForm:r125enum('ridge','shed','gable','hip'),
   roofAxis:r125enum('x','z')},[...required,'roofForm','roofAxis']);
  return {anyOf:[flat,roofed],description:
-  'Flat volume omits both roofForm and roofAxis; ridge, shed or gable volume requires both.'};
+  'Flat volume omits both roofForm and roofAxis; ridge, shed, gable or hip volume requires both.'};
 };
 const r125RootSpatialVolume=r125SpatialVolume(false);
 const r125AttachedSpatialVolume=r125SpatialVolume(true);
@@ -633,7 +633,7 @@ onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
   "JSON: schema exactly minecraftaibuilder-r125-architecture-plan-v1. Top-level schema,id,title,brief,footprint,levels,materials, plus permitted entry,entryZone,expression,observationLink. IDs lowercase hyphen slugs 3..39 characters; title/brief/purpose meaningful strings. Room requires id,purpose,access:public|shared|staff. Optional fixtures array 1..5; fixtureDetail:\"crafted\", fixtureArrangement:\"focal-island\" or \"table-group\" (one table first, seating later in fixtures; keep usable space between them), ovenHearth:\"accent\" only with oven, daylight. Never output legacy fixture or fixtureScale. Use structured fields for every claimed shape; prose does not generate geometry.",
   "footprint EXACT {width:integer 16..32,depth:integer 16..32}. Conventional levels:1 or 2; 2..3 rooms per floor, 4 only on a single floor. splitAxis:x|z; splitPercent 30..70 step 5. first room occupies WEST for x; first room occupies FRONT for z. For 3 rooms optional secondarySplitPercent 25..75 step 5 is FRONT share of the EAST wing for x, WEST share of rear wing for z. Omit on 2 rooms.",
   "FOUR rooms: z front hub (width>=22,depth>=18,splitPercent 30..50), or x west spine (width>=20,depth>=22,splitPercent 30..60,entryZone:first). First public/shared; direct two-wide doors to three rooms. Optional rearBayPercentages (z) or sideBayPercentages (x): two values 35..70 step 5, gap>=30. Omit for equal bays. Hub/spine >=4 clear cells, rear >=6 or east >=5. No courts/recessed-portico.",
-  "SPATIAL-TREE: layoutMode:\"spatial-tree\" on a single level. rootSpace is public/shared and its volume MUST OMIT attach. attachedSpaces contains 1..3 rooms; EVERY room MUST include volume.attach to an earlier authored room ID, side east/west/north/south, shift -3..3. Width/depth 6..14, roofY 6..10 (clear interior = dimensions minus 2). Join on one shared wall with >=4 common cells for a real two-wide door. No volume overlaps; allow exterior entry and real windows. For spatial-tree OMIT expression and entryZone; use optional entry.shelterDepth:1..3 and portalStyle:\"projecting-frame\", volume.facadeRelief:\"front-piers\", roofForm:ridge|shed|gable with roofAxis:x|z (omit both for flat). Vary connected volumes and heights only as useful. Site width/depth must cover the bounding span of connected volumes plus four cells; depth also includes shelterDepth. HOST does not enlarge an undersized footprint unless the explicit experimental siteFit delegation is selected.",
+  "SPATIAL-TREE: layoutMode:\"spatial-tree\" on a single level. rootSpace is public/shared and its volume MUST OMIT attach. attachedSpaces contains 1..3 rooms; EVERY room MUST include volume.attach to an earlier authored room ID, side east/west/north/south, shift -3..3. Width/depth 6..14, roofY 6..10 (clear interior = dimensions minus 2). Join on one shared wall with >=4 common cells for a real two-wide door. No volume overlaps; allow exterior entry and real windows. For spatial-tree OMIT expression and entryZone; use optional entry.shelterDepth:1..3 and portalStyle:\"projecting-frame\", volume.facadeRelief:\"front-piers\", roofForm:ridge|shed|gable|hip with roofAxis:x|z (omit both for flat). Hip needs width>=8/depth>=12 for x, width>=12/depth>=8 for z. Vary connected volumes and heights only as useful. Site width/depth must cover the bounding span of connected volumes plus four cells; depth also includes shelterDepth. HOST does not enlarge an undersized footprint unless the explicit experimental siteFit delegation is selected.",
   "Optional spatial-tree root spatialUse:\"open-court\" for genuine outdoor activity: keep roofY, omit daylight, roofForm, roofAxis; other rooms enclosed. Not an indoor substitute.",
   "Fixtures: counter|workbench|display|storage|seating|bed|desk|washbasin|electronics|oven|service-bay|tool-rack|teaching-board|inspection-stand|assembly-table|large-table|table. Crafted/focal-island need fixtures. table-group places seating facing the single authored table with a clear gap; choose it only for a genuinely shared activity. Equipment is a physical proxy, not working machinery. Select ROOM-APPROPRIATE fixture, not filler.",
   "DAYLIGHT: wide-bay is exactly 4 blocks (requires an exposed wall at least 8 blocks long; a 6x6 volume cannot use it); paired-bays two 3x2 windows (faces >=7), root entrance-flanking paired-bays needs width at least 14. panorama exact 8x2 (face >=12); clerestory high window. Leave sill, lintel, exterior air and usable interior approach; no entrance, attached joint or door may overlap it. If none fits, omit daylight for that room only if compatible with the brief; otherwise reconsider room geometry. Never emit daylight:none.",
