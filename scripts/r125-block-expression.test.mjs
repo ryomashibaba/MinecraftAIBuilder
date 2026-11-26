@@ -5,7 +5,7 @@ import {compileArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {compileDesign,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
 import {buildR125BlockExpression,verifyR125BlockExpression,resolveR125FinalOwners,
- validateR125BlockPalette,prepareR125BlockPaletteRequest,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
+ validateR125BlockPalette,prepareR125BlockPaletteRequest,makeR125BlockComparisonTemplate,r125ReviewFaces,r125ReviewPattern} from '../source/ai/r125-block-expression.mjs';
 const box=(id,mode,material,origin,size,repeat)=>({id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size,...(repeat?{repeat}:{})});
 const design={schema:SCHEMA,id:'v38-test',title:'Synthetic',brief:'Not a model work',bounds:{width:12,height:12,depth:12},designOnly:true,elements:[
  box('floor-0','add','wood',[1,1,1],[10,1,10]),
@@ -110,4 +110,41 @@ test('real gallery comparison uses the original template and exact source',()=>{
  assert.ok(html.includes(scene.geometrySha256));
  assert.ok(!html.includes('__B143_GALLERY_JSON__'));
  assert.equal(gallery.safety.constructionApproved,false);
+});
+
+test('model-selected window frame and shelf finish preserve exact geometry and protect other glass',()=>{
+ const d={...design,elements:[
+  box('l0-front','add','wood',[1,2,1],[8,4,1]),
+  box('l0-window-front-cut','cut',null,[3,3,1],[2,2,1]),
+  box('l0-window-front-glass','add','glass',[3,3,1],[2,2,1]),
+  box('fx-l0-z0-i0-bottom-shelf','add','metal',[2,2,4],[3,1,1]),
+  box('fx-l0-z0-i0-shelf-object','add','accent',[3,3,4],[1,1,1]),
+  box('fx-l0-z0-i1-glass','add','glass',[2,3,5],[2,1,1]),
+  box('l0-divider','add','wood',[2,2,6],[6,4,1])
+ ]};
+ const s=compileDesign(d),a={design:d,scene:s,palette:{wall:'spruce_planks',windowFrame:'quartz_block',storage:'bookshelf'}};
+ const p=buildR125BlockExpression(a);
+ assert.equal(p.coverage.windowFrame.selected,8);
+ assert.equal(p.coverage.storage.selected,4);
+ assert.equal(by(p,3,3,1)[6],null);
+ assert.equal(by(p,2,3,1)[6],'quartz_block');
+ assert.equal(by(p,2,2,6)[6],'spruce_planks');
+ assert.equal(by(p,3,2,4)[6],'bookshelf');
+ assert.deepEqual(p.rows.map(r=>r.slice(0,4)),s.primitives.map(r=>r.slice(0,4)));
+ assert.equal(verifyR125BlockExpression(a,p),true);
+ assert.throws(()=>validateR125BlockPalette({wall:'bookshelf'}));
+});
+test('face culling uses correct camera octants and actual visible occupancy',()=>{
+ const a=[1,1,1,0,0],b=[2,1,1,0,0];
+ const q=r125ReviewFaces([a,b],Math.PI/4,.6);
+ assert.equal(q.length,5);
+ assert.equal(q.some(f=>f.cell===a&&f.normal[0]===1),false);
+ assert.equal(q.some(f=>f.cell===b&&f.normal[0]===1),true);
+ const reverse=r125ReviewFaces([a,b],-3*Math.PI/4,.6);
+ assert.equal(reverse.some(f=>f.cell===a&&f.normal[0]===-1),true);
+ assert.equal(reverse.some(f=>f.cell===b&&f.normal[0]===-1),false);
+ assert.equal(r125ReviewFaces([a],Math.PI/4,.6).length,3);
+ assert.ok(r125ReviewPattern('oak_planks','top').length>0);
+ assert.ok(r125ReviewPattern('bookshelf','x').length>0);
+ assert.deepEqual(r125ReviewPattern('white_concrete','top'),[]);
 });
