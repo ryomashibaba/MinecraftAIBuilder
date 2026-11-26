@@ -294,7 +294,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.properties.fixtures.uniqueItems,undefined,
     'the Ollama schema accepts multiple author-chosen instances of one role');
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
-   assert.deepEqual(room.properties.fixtureArrangement.enum,['focal-island']);
+   assert.deepEqual(room.properties.fixtureArrangement.enum,['focal-island','table-group']);
    assert.equal(room.required.includes('fixtureArrangement'),false);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=authorSchema.properties.expression.anyOf;
@@ -845,7 +845,7 @@ test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>
  const roofed=choices.find(v=>Object.hasOwn(v.properties,'roofForm'));
  const flat=choices.find(v=>!Object.hasOwn(v.properties,'roofForm'));
  assert.deepEqual(roofed.properties.roofForm.enum,
-  ['ridge','shed','gable']);
+  ['ridge','shed','gable','hip']);
  assert.deepEqual(roofed.properties.roofAxis.enum,['x','z']);
  assert.equal(flat.required.includes('roofForm'),false);
  assert.equal(flat.required.includes('roofAxis'),false,
@@ -897,7 +897,7 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  assert.deepEqual(roofedRoot.required,
   ['width','depth','roofY','roofForm','roofAxis']);
  assert.equal(Object.hasOwn(flatRoot.properties,'roofAxis'),false);
- assert.deepEqual(roofedRoot.properties.roofForm.enum,['ridge','shed','gable']);
+ assert.deepEqual(roofedRoot.properties.roofForm.enum,['ridge','shed','gable','hip']);
  assert.equal(Object.hasOwn(flatRoot.properties,'attach'),false);
  const attachedVolumeChoices=attached.properties.volume.anyOf;
  const flatAttached=attachedVolumeChoices.find(v=>!Object.hasOwn(v.properties,'roofForm'));
