@@ -19,6 +19,7 @@ import {addR125HipRoof} from './r125-hip-roof.mjs';
 import {addR125AuthoredObservation} from './r125-room-observation.mjs';
 import {validateR125BlockPalette} from './r125-block-expression.mjs';
 import {addR125WindowRelief,WINDOW_RELIEF_MODES} from './r125-window-relief.mjs';
+import {addR125WallRelief,WALL_RELIEF_MODES} from './r125-wall-relief.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -232,7 +233,8 @@ export function validateArchitecturePlan(p){
   ...(spatialEntrySpecified?['entry']:[]),
   ...(observationSpecified?['observationLink']:[]),
   ...(Object.hasOwn(p??{},'blockPalette')?['blockPalette']:[]),
-  ...(Object.hasOwn(p??{},'windowRelief')?['windowRelief']:[])]),
+  ...(Object.hasOwn(p??{},'windowRelief')?['windowRelief']:[]),
+  ...(Object.hasOwn(p??{},'wallRelief')?['wallRelief']:[])]),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
  // B143 permits up to 500 characters of brief; keep title and room-purpose
@@ -263,6 +265,7 @@ export function validateArchitecturePlan(p){
   'MATERIAL_PALETTE');
  if(Object.hasOwn(p,'blockPalette'))validateR125BlockPalette(p.blockPalette);
  if(Object.hasOwn(p,'windowRelief'))check(WINDOW_RELIEF_MODES.includes(p.windowRelief),'WINDOW_RELIEF_MODE');
+ if(Object.hasOwn(p,'wallRelief'))check(WALL_RELIEF_MODES.includes(p.wallRelief),'WALL_RELIEF_MODE');
  if(expressive){
   const e=p.expression;
   check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis',
@@ -769,14 +772,16 @@ function compileR125SpatialArchitecturePlan(original){
 
 export function compileArchitecturePlan(plan,options={}){
  const base=compileArchitecturePlanBase(plan,options);
- if(!Object.hasOwn(plan,'windowRelief'))return base;
- const decorated=addR125WindowRelief(base,plan.windowRelief);
+ if(!Object.hasOwn(plan,'windowRelief')&&!Object.hasOwn(plan,'wallRelief'))return base;
+ let decorated=base;
+ if(Object.hasOwn(plan,'windowRelief'))decorated=addR125WindowRelief(decorated,plan.windowRelief);
+ if(Object.hasOwn(plan,'wallRelief'))decorated=addR125WallRelief(decorated,plan.wallRelief);
  const routes=auditR125SourceRoutes(decorated,{featureTargets:decorated.fixtureTargets??[]});
  const visitors=auditR125VisitorRoutes(decorated,plan);
  const circulation=auditArchitecturePlanCirculation(decorated);
  check(routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
   !visitors.status.startsWith('HOLD_')&&circulation.status==='SOURCE_CLEARANCE_PROBES_PASS',
-  'WINDOW_RELIEF_SOURCE_CLEARANCE');
+  Object.hasOwn(plan,'wallRelief')?'WALL_RELIEF_SOURCE_CLEARANCE':'WINDOW_RELIEF_SOURCE_CLEARANCE');
  return {...decorated,...(base.spatialComposition?{sourceRoutes:routes,visitorCirculation:visitors}:{})};
 }
 function compileArchitecturePlanBase(plan,{

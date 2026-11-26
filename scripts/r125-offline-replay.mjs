@@ -511,6 +511,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    }:{}),
    visualHighRiskCount:critique.highRiskCount,
    ...(built.windowRelief?{windowRelief:built.windowRelief}:{}),
+   ...(built.wallRelief?{wallRelief:built.wallRelief}:{}),
    ...(built.spatialLayout?{spatialLayout:built.spatialLayout}:{}),
    ...(built.spatialDetail?{spatialDetail:built.spatialDetail}:{}),
     ...(built.activityInlayReview?{activityInlayReview:built.activityInlayReview}:{}),
