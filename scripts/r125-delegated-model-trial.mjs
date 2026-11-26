@@ -146,6 +146,13 @@ export function prepareR125CompactSpatialRequest(body){
  return next;
 }
 
+/** Shared by offline preparation and the actual one-shot transport.
+ * Never send anything from this function; callers own lifecycle and IO. */
+export function prepareR125TrialRequest(body,{compactDesign=false}={}){
+ if(typeof compactDesign!=='boolean')fail('COMPACT_MODE');
+ const extended=prepareR125MaterialsTrialRequest(body);
+ return compactDesign?prepareR125CompactSpatialRequest(extended):extended;
+}
 export function createR125MaterialsTrialTransport(transport,capture,{compactDesign=false}={}){
  if(typeof transport!=='function'||typeof capture!=='function'||typeof compactDesign!=='boolean')fail('TRANSPORT');
  let attempted=false;
@@ -154,8 +161,7 @@ export function createR125MaterialsTrialTransport(transport,capture,{compactDesi
   attempted=true;
   if(url!=='http://127.0.0.1:11434/v1/chat/completions'||
      init?.method!=='POST'||init.redirect!=='error'||typeof init.body!=='string')fail('TRANSPORT_BOUNDARY');
-  const extended=prepareR125MaterialsTrialRequest(JSON.parse(init.body));
-  const body=JSON.stringify(compactDesign?prepareR125CompactSpatialRequest(extended):extended);
+  const body=JSON.stringify(prepareR125TrialRequest(JSON.parse(init.body),{compactDesign}));
   capture(body);
   return transport(url,{...init,body});
  };
@@ -261,10 +267,12 @@ export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const write=(dest,value)=>fs.writeFileSync(dest,typeof value==='string'?value:JSON.stringify(value,null,2)+'\n',{flag:'wx'});
 function run(argv){
- if(['prepare','prepare-materials'].includes(argv[0])&&argv.length===3){
+ if(['prepare','prepare-materials','prepare-compact'].includes(argv[0])&&argv.length===3){
   const body=JSON.parse(fs.readFileSync(argv[1],'utf8'));
-  const prepared=prepareR125DelegatedRequest(body);
-  write(argv[2],argv[0]==='prepare-materials'?prepareR125BlockPaletteRequest(prepared):prepared);
+  const prepared=argv[0]==='prepare'?prepareR125DelegatedRequest(body):
+   prepareR125TrialRequest(body,{compactDesign:argv[0]==='prepare-compact'});
+  // Exact wire serialization, not pretty-printed or newline-terminated.
+  write(argv[2],JSON.stringify(prepared));
   return {status:'REQUEST_PREPARED_NO_POST'};
  }
  if(argv[0]==='replay'&&argv.length===4){
@@ -301,7 +309,7 @@ function run(argv){
   if(!r.sourceVerified)process.exitCode=2;
   return {status:r.status,delegationSelected:r.delegationSelected,sourceVerified:r.sourceVerified,changes:r.changes??[],attempts:r.attempts?.length??0};
  }
- fail('USAGE: prepare|prepare-materials BASE_REQUEST.json NEW_REQUEST.json | replay RAW.txt REQUEST_ORIGINAL.txt NEW_PRIVATE_DIR');
+ fail('USAGE: prepare|prepare-materials|prepare-compact BASE_REQUEST.json NEW_REQUEST.json | replay RAW.txt REQUEST_ORIGINAL.txt NEW_PRIVATE_DIR');
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{console.log(JSON.stringify(run(process.argv.slice(2))))}

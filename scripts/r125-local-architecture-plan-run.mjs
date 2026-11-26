@@ -38,6 +38,21 @@ const sha=raw=>createHash('sha256').update(raw).digest('hex');
 const write=(dir,name,data)=>fs.writeFileSync(path.join(dir,name),
  typeof data==='string'?data:JSON.stringify(data,null,2)+'\n',{flag:'wx'});
 
+/** Optional presentation is not SOURCE evidence. Do not discard a
+ * separately verified source because a viewer or artifact write failed. */
+export function reviewR125OptionalArtifact(render){
+ if(typeof render!=='function')fail('OPTIONAL_REVIEW_CALLBACK');
+ try{return render();}
+ catch(error){return {status:'HOLD_OPTIONAL_REVIEW',reason:String(error?.message??error).slice(0,180)};}
+}
+export function summarizeR125DelegatedSource(derived){
+ if(!derived?.sourceVerified)return null;
+ const changed=(derived.changes??[]).length>0;
+ if(changed&&(!derived.candidate||typeof derived.resolvedPlanSha256!=='string'))fail('DELEGATED_PROVENANCE_MISSING');
+ return {kind:changed?'MODEL_INTENT_HOST_RESOLVED':'MODEL_PLAN_NO_DELEGATED_DIMENSION_CHANGE',
+  dimensionChanges:derived.changes??[],resolvedPlanSha256:derived.resolvedPlanSha256??null,
+  modelAuthorshipIndependentlyVerified:false};
+}
 /** Bounded, read-only report of an invalid original model setback.
  * It does NOT correct plan JSON, infer missing geometry or expose prompts.
  */
@@ -273,10 +288,10 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
    fail('INVALID_REVISION_SOURCE_DIAGNOSIS_'+String(error?.message??error).slice(0,100));
   }
  }
- let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null,actualRequestSha256=null;
+ let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null,actualRequestSha256=null,preparedTransportAttempts=0;
  const transport=trialMode?fetchR125LongLocalCompletion:fetcher;
  const selectedTransport=materialsTrial?createR125MaterialsTrialTransport(transport,body=>{
-  write(dest,'MODEL_REQUEST_EXACT.json',body);actualRequestSha256=sha(body);
+  write(dest,'MODEL_REQUEST_EXACT.json',body);actualRequestSha256=sha(body);preparedTransportAttempts=1;
  },{compactDesign}):transport;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
@@ -354,13 +369,17 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
    if(delegated.sourceVerified!==diagnosis.sourceVerified)fail('DELEGATED_REPLAY_MISMATCH');
   }
   write(dest,'SOURCE_DIAGNOSIS.json',diagnosis);
+  let htmlReview=null;
   if(sourceDesign){
    write(dest,'B143_SOURCE_REVIEW_ONLY.json',sourceDesign);
    // Render exactly the B143 geometry just audited, no invented voxels.
-   const template=fs.readFileSync(
-    path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
-   const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
-   write(dest,'B143_SOURCE_3D_REVIEW_ONLY.html',html);
+   const makeHtml=()=>{
+    const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
+    const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
+    write(dest,'B143_SOURCE_3D_REVIEW_ONLY.html',html);
+    return {status:'TRUE_B143_HTML_GENERATED_ART_PENDING'};
+   };
+   htmlReview=materialsTrial?reviewR125OptionalArtifact(makeHtml):makeHtml();
   }
   let materialReview=null,staticReview=null,authoredFeatures=null;
   if(materialsTrial){
@@ -382,19 +401,24 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
     const scene=compileDesign(sourceDesign);
     if(!verifyCompiled(sourceDesign,scene)||scene.sourceSha256!==diagnosis.sourceSha256||scene.geometrySha256!==diagnosis.geometrySha256)fail('MATERIAL_SOURCE_REPLAY_MISMATCH');
     const args={design:sourceDesign,scene,palette:selected.blockPalette,origin:'CALLER_PROVIDED_MODEL_RESPONSE_UNVERIFIED',originalRaw:raw};
+    materialReview=reviewR125OptionalArtifact(()=>{
     const expression=buildR125BlockExpression(args);
     const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
     const gallery=compileB143Gallery([sourceDesign]);
     const comparison=makeR125BlockComparisonTemplate(template,args,expression);
     write(dest,'V38_BLOCK_EXPRESSION_REVIEW_ONLY.json',expression);
     write(dest,'V38_BLOCK_COMPARISON_REVIEW_ONLY.html',renderB143Html(gallery,comparison));
-    materialReview={expressionSha256:expression.expressionSha256,status:expression.status,roofSurface:null};
+    const summary={expressionSha256:expression.expressionSha256,status:expression.status,roofSurface:null};
     if(Object.hasOwn(selected,'roofSurface')){
+     summary.roofSurface=reviewR125OptionalArtifact(()=>{
      const shape=buildR125RoofSurface(args,expression);
      write(dest,'V385_ROOF_SURFACE_REVIEW_ONLY.json',shape);
      write(dest,'V385_ROOF_SURFACE_REVIEW_ONLY.html',renderB143Html(gallery,makeR125RoofSurfaceTemplate(comparison,args,expression,shape)));
-     materialReview.roofSurface={status:shape.status,counts:shape.counts,shapeSha256:shape.shapeSha256};
+     return {status:shape.status,counts:shape.counts,shapeSha256:shape.shapeSha256};
+     });
     }
+    return summary;
+    });
    }
   }
   // A tested SOURCE candidate can also yield a REVIEW-ONLY MakeCode file.
@@ -431,13 +455,14 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
   }
   result={...common,
    status:diagnosis.status,originalSha256:answer.originalSha256,
-   ...(materialsTrial?{actualRequestSha256,materialReview,staticReview,authoredFeatures,delegationSelected:delegated.delegationSelected??false,delegatedChanges:delegated.changes??[]}:{}),
+   ...(materialsTrial?{actualRequestSha256,materialReview,staticReview,authoredFeatures,sourcePlanDerivation:summarizeR125DelegatedSource(delegated),delegationSelected:delegated.delegationSelected??false,delegatedChanges:delegated.changes??[]}:{}),
    normalizedPlanSha256:answer.normalizedPlanSha256,
    normalization:answer.normalization,
    sourceSha256:diagnosis.sourceSha256??null,
    geometrySha256:diagnosis.geometrySha256??null,
    sourceVerified:diagnosis.sourceVerified===true,
-   review3d:sourceDesign?'TRUE_B143_HTML_GENERATED_ART_PENDING':'NOT_GENERATED',
+   review3d:htmlReview?.status??'NOT_GENERATED',
+   ...(materialsTrial?{htmlReview}:{}),
    modelCallAttempts:1,modelResponsesCaptured:1,
    originalCaptureFinishReason:captured.finishReason,
    modelRequestElapsedMs:modelElapsedMs,
@@ -480,7 +505,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
     modelElapsedMs??Date.now()-modelStartMs,
    providerReportedTokenUsage:captured?.usage??null,
    makeCodeStatus,makeCodeReason,makeCodeSourceSha256,
-   sourceVerified:false,modelCallAttempts:1,
+   sourceVerified:false,modelCallAttempts:materialsTrial?preparedTransportAttempts:1,
    modelResponsesCaptured:captured?1:0,
    modelResponseCaptureKind:captured?.captureKind??null};
  }finally{

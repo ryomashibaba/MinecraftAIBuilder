@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {r125ResponseFormatForEndpoint,DEFAULT_LOCAL_ENDPOINT} from '../source/ai/b198g-local-model-adapter.mjs';
-import {prepareR125MaterialsTrialRequest,prepareR125CompactSpatialRequest,createR125MaterialsTrialTransport} from './r125-delegated-model-trial.mjs';
-import {parseR125LocalPlanArgs} from './r125-local-architecture-plan-run.mjs';
+import {prepareR125MaterialsTrialRequest,prepareR125CompactSpatialRequest,prepareR125TrialRequest,createR125MaterialsTrialTransport} from './r125-delegated-model-trial.mjs';
+import {parseR125LocalPlanArgs,reviewR125OptionalArtifact,summarizeR125DelegatedSource} from './r125-local-architecture-plan-run.mjs';
 const request=(spatialTreeOnly=true,observationRequired=false)=>({model:'qwen3:14b',stream:false,temperature:.55,max_tokens:4096,
  response_format:r125ResponseFormatForEndpoint(DEFAULT_LOCAL_ENDPOINT,{spatialTreeOnly,observationRequired}),
  messages:[{role:'system',content:'Old full system'},{role:'user',content:JSON.stringify({architecturalRequest:'明るい共同作業場所を作って。',requiredFixtureRoles:['table'],observationRelationRule:'unchanged'})}]});
@@ -31,4 +31,30 @@ test('compact mode cannot bypass fresh spatial materials trial',()=>{
  assert.equal(parseR125LocalPlanArgs([...base,'--trial-mode','--materials-trial','--spatial-tree-only','--compact-design']).compactDesign,true);
  assert.throws(()=>parseR125LocalPlanArgs([...base,'--trial-mode','--materials-trial','--compact-design']),/COMPACT_DESIGN/);
  assert.throws(()=>parseR125LocalPlanArgs([...base,'--spatial-tree-only','--compact-design']),/COMPACT_DESIGN/);
+});
+
+test('offline preparation matches actual transport byte for byte',async()=>{
+ for(const compactDesign of [false,true])for(const observationRequired of [false,true]){
+  const body=request(true,observationRequired),prepared=prepareR125TrialRequest(body,{compactDesign});
+  let captured,sent;
+  const send=createR125MaterialsTrialTransport(async(url,init)=>{sent=init.body;return {ok:true}},x=>{captured=x},{compactDesign});
+  await send(DEFAULT_LOCAL_ENDPOINT,{method:'POST',redirect:'error',body:JSON.stringify(body)});
+  assert.equal(sent,JSON.stringify(prepared));assert.equal(captured,sent);
+  assert.equal(Object.hasOwn(prepared.response_format.json_schema.schema.anyOf[0].properties,'observationLink'),observationRequired);
+ }
+});
+test('optional viewer failure does not mislabel separately proven source',()=>{
+ const source={sourceVerified:true,status:'B143_SOURCE_CANDIDATE_ART_HOLD'};
+ const copy=structuredClone(source);
+ assert.deepEqual(reviewR125OptionalArtifact(()=>{throw Error('renderer failure')}),{status:'HOLD_OPTIONAL_REVIEW',reason:'renderer failure'});
+ assert.deepEqual(source,copy);
+ assert.deepEqual(reviewR125OptionalArtifact(()=>({status:'SHAPE_PREVIEW_ONLY'})),{status:'SHAPE_PREVIEW_ONLY'});
+});
+test('separate genuine answer from host-resolved dimensions',()=>{
+ const c={field:'footprint.depth',from:18,to:19};
+ assert.equal(summarizeR125DelegatedSource({sourceVerified:false}),null);
+ assert.equal(summarizeR125DelegatedSource({sourceVerified:true}).kind,'MODEL_PLAN_NO_DELEGATED_DIMENSION_CHANGE');
+ const summary=summarizeR125DelegatedSource({sourceVerified:true,changes:[c],candidate:{footprint:{depth:19}},resolvedPlanSha256:'recorded'});
+ assert.equal(summary.kind,'MODEL_INTENT_HOST_RESOLVED');assert.deepEqual(summary.dimensionChanges,[c]);
+ assert.throws(()=>summarizeR125DelegatedSource({sourceVerified:true,changes:[c]}),/DELEGATED_PROVENANCE_MISSING/);
 });
