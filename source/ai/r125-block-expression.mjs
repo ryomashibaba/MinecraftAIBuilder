@@ -206,22 +206,22 @@ export function makeR125BlockComparisonTemplate(template,args,packet){
  const replace=(s,a,b)=>{if(s.indexOf(a)<0||s.indexOf(a)!==s.lastIndexOf(a))fail('VIEWER_ANCHOR');return s.replace(a,b)};
  let t=replace(template,'<div id="materialToggles"></div>',
   '<div id="materialToggles"></div><div class="toggle"><input id="v38Blocks" type="checkbox" checked><label for="v38Blocks">V38 部位別ブロック色（旧表示と比較）</label></div><div class="info warn">色の近似表示のみ。Minecraftテクスチャ・Education施工未認証。選択された部位のみ変更。凡例は元のB143分類。</div><div class="toggle"><input id="v38Shade" type="checkbox" checked><label for="v38Shade">陰影・簡易素材模様・正確な断面</label></div>');
- t=replace(t,'const palette=','const v38Colors='+JSON.stringify(colors)+';\nconst palette=');
+ t=replace(t,'const palette=','const v38Colors='+JSON.stringify(colors)+';\nconst v38Source='+JSON.stringify(packet.geometrySha256)+';\nconst palette=');
  t=replace(t,'const color=palette[m]||"#aabbcc",height=1;',
-  'const color=(el("v38Blocks").checked?v38Colors[[x,y,z].join(",")]:null)||palette[m]||"#aabbcc",height=1;');
+  'const color=(el("v38Blocks").checked&&s.geometrySha256===v38Source?v38Colors[[x,y,z].join(",")]:null)||palette[m]||"#aabbcc",height=1;');
  t=replace(t,'function drawSoon(){','el("v38Blocks").addEventListener("change",drawSoon);\nel("v38Shade").addEventListener("change",drawSoon);\nfunction drawSoon(){');
  // Preserve the original template and baseline path. Enhanced mode is
  // available only for the specific verified SOURCE, never another gallery.
  const marker=' let painted=0;';
  if(t.includes(marker)){
-  t=replace(t,'const palette=','const v38All='+JSON.stringify(args.scene.primitives)+';\nconst v38BlockIds='+JSON.stringify(blocks)+';\nconst v38Catalog='+JSON.stringify(catalog)+';\nconst v38Source='+JSON.stringify(packet.geometrySha256)+';\n'+r125ReviewFaces.toString()+'\n'+r125ReviewPattern.toString()+'\nconst palette=');
+  t=replace(t,'const palette=','const v38All='+JSON.stringify(args.scene.primitives)+';\nconst v38BlockIds='+JSON.stringify(blocks)+';\n'+r125ReviewFaces.toString()+'\n'+r125ReviewPattern.toString()+'\nconst palette=');
   const enhanced=` let painted=0;
  if(el("v38Shade").checked&&s.geometrySha256===v38Source){
   const cells=v38All.filter(p=>p[4]<=limit&&visible(p));
   for(const f of r125ReviewFaces(cells,yaw,pitch)){
    const p=f.cell,m=s.layerNames[p[3]].slice(5).toLowerCase(),id=v38BlockIds[p.slice(0,3).join(",")];
    const blockMode=el("v38Blocks").checked;
-   const color=blockMode?(v38Catalog[id]||palette[m]):palette[m];
+   const color=blockMode?(v38Colors[p.slice(0,3).join(",")]||palette[m]):palette[m];
    const vs=f.vertices.map(q=>project(...q));
    const factor=f.axis==="top"?1.12:f.axis==="x"?.79:.93;
    const rgb=color.slice(1).match(/../g).map(n=>Math.min(255,Math.round(parseInt(n,16)*factor)));
