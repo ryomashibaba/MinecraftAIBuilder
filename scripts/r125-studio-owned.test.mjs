@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {prepareR125StudioNewRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
+import {prepareR125StudioNewRequest,prepareR125StudioRevisionRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
 const input={model:'qwen3:14b',prompt:'自然光が入る小さな交流施設を作ってください。',headSha:'a'.repeat(40)};
 test('arbitrary brief prepares the real owned adapter without network and changes request hash',async()=>{
  let wire;
@@ -125,4 +125,31 @@ test('calibration project lease loss fails closed before any HTTP',async()=>{
   assert.equal(r.modelPostCount,0);assert.equal(r.resourceSafetyCertified,false);
  }
  assert.equal(posts,0);assert.equal(stops,2);
+});
+
+// The revision candidate is preparation-only; the pinned P0 production entry
+// remains unchanged. The actual adapter sees the original authored plan.
+test('offline revision preparation binds exact base and revision request without writing artifacts',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-studio-revision-'));
+ const planPath=path.join(root,'plan.json'),diagPath=path.join(root,'diagnosis.json');
+ const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
+ const hash=x=>createHash('sha256').update(x).digest('hex');
+ const plan=JSON.parse(original),prompt='店舗の外形を保ち、内装の使いやすさを改善してください。';
+ fs.writeFileSync(planPath,original);let wire;
+ try{
+  const a=await prepareR125StudioRevisionRequest({...input,prompt,revisionPlanPath:planPath},{onWireBody:body=>{wire=body;}});
+  assert.equal(a.modelPostCount,0);assert.equal(a.mode,'revision');
+  assert.equal(a.basePlanSha256,hash(JSON.stringify(plan)));assert.equal(a.requestSha256,hash(wire));
+  assert.equal(a.sourceDiagnosisSha256,null);assert.equal('wireBody' in a,false);
+  const payload=JSON.parse(JSON.parse(wire).messages[1].content);
+  assert.deepEqual(payload.previousArchitecturePlan,plan);assert.equal(payload.revisionRequest,prompt);
+  assert.equal(Object.hasOwn(payload,'previousSourceDiagnosis'),false);
+  assert.deepEqual(fs.readdirSync(root),['plan.json']);
+  assert.equal(fs.readFileSync(planPath,'utf8'),original);
+  const b=await prepareR125StudioRevisionRequest({...input,prompt:prompt+' 照明も改善。',revisionPlanPath:planPath});
+  assert.notEqual(a.requestSha256,b.requestSha256);
+  fs.writeFileSync(diagPath,JSON.stringify({status:'SOURCE_PASS',sourceVerified:true,compilerReason:null}));
+  await assert.rejects(prepareR125StudioRevisionRequest({...input,prompt,revisionPlanPath:planPath,revisionDiagnosisPath:diagPath}),/INVALID_REVISION_SOURCE_DIAGNOSIS/);
+  await assert.rejects(prepareR125StudioRevisionRequest({...input,prompt,revisionPlanPath:path.join(root,'missing.json')}),/INVALID_REVISION_BASE_PLAN/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
 });

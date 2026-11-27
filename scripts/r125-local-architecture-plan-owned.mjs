@@ -11,7 +11,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {randomBytes,createHash} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirectory} from './r125-local-architecture-plan-run.mjs';
+import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirectory,readR125RevisionInputs} from './r125-local-architecture-plan-run.mjs';
 import {createR125ArchitecturePlanLocalAdapter} from '../source/ai/b198g-local-model-adapter.mjs';
 import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
 
@@ -638,6 +638,14 @@ const shaText=text=>createHash('sha256').update(text).digest('hex');
 export async function prepareR125StudioNewRequest({model,prompt,headSha}={}, {onWireBody=null}={}){
  if(model!==MODEL||typeof prompt!=='string'||prompt.length<8||prompt.length>8000||
     !HEAD_RE.test(headSha??''))throw Error('STUDIO_NEW_REQUEST_INVALID');
+ const exact=await captureR125StudioWire({model,prompt});
+ if(onWireBody!==null)await onWireBody(exact);
+ return {schema:'r125-studio-new-request-v1',mode:'new',headSha,model,
+  briefSha256:shaText(prompt),requestSha256:shaText(exact),endpoint:OWNED_ENDPOINT,
+  maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
+}
+
+async function captureR125StudioWire({model,prompt,revisionContext=null}){
  let exact=null;
  const author=createR125ArchitecturePlanLocalAdapter({model,endpoint:OWNED_ENDPOINT,
   maxOutputTokens:MAX_OUTPUT_TOKENS,onRawModelResponse:()=>{},
@@ -646,14 +654,28 @@ export async function prepareR125StudioNewRequest({model,prompt,headSha}={}, {on
     throw Error('STUDIO_PREPARE_BOUNDARY');
    exact=String(init.body);return {ok:false,status:418};
   }});
- try{await author({prompt});throw Error('STUDIO_PREPARE_UNEXPECTED_SUCCESS');}
+ try{await author({prompt,...(revisionContext?{revisionContext}:{})});throw Error('STUDIO_PREPARE_UNEXPECTED_SUCCESS');}
  catch(error){if(exact===null||!String(error?.message).includes('LOCAL_HTTP_418'))throw error;}
- // Only the in-process PRIVATE verifier needs the exact payload to determine
- // calibrated input scope. Never expose it in CLI stdout or the public receipt.
+ return exact;
+}
+
+/** Offline-only revision preparation; uses the actual adapter and the existing
+ * runner's input validation. No execution entry, HTTP, artifact writes or approval. */
+export async function prepareR125StudioRevisionRequest({model,prompt,headSha,
+ revisionPlanPath,revisionDiagnosisPath=null}={}, {onWireBody=null}={}){
+ if(model!==MODEL||typeof prompt!=='string'||prompt.length<8||prompt.length>8000||
+    !HEAD_RE.test(headSha??'')||typeof revisionPlanPath!=='string'||!revisionPlanPath.trim())
+  throw Error('STUDIO_REVISION_REQUEST_INVALID');
+ const {revisionBase,revisionBaseSha256,revisionDiagnosis,revisionDiagnosisSha256}=
+  readR125RevisionInputs({revisionPlanPath,revisionDiagnosisPath});
+ const exact=await captureR125StudioWire({model,prompt,revisionContext:{
+  previousArchitecturePlan:revisionBase,revisionRequest:prompt,
+  ...(revisionDiagnosis?{sourceDiagnosis:revisionDiagnosis}:{})}});
  if(onWireBody!==null)await onWireBody(exact);
- return {schema:'r125-studio-new-request-v1',mode:'new',headSha,model,
-  briefSha256:shaText(prompt),requestSha256:shaText(exact),endpoint:OWNED_ENDPOINT,
-  maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
+ return {schema:'r125-studio-revision-request-v1',mode:'revision',headSha,model,
+  briefSha256:shaText(prompt),requestSha256:shaText(exact),
+  basePlanSha256:revisionBaseSha256,sourceDiagnosisSha256:revisionDiagnosisSha256,
+  endpoint:OWNED_ENDPOINT,maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
 }
 /** Receipt is emitted only after the existing owned lifecycle has settled.
  * A runner SOURCE report alone must not trigger Studio import. */
