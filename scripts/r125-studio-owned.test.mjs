@@ -4,11 +4,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {prepareR125StudioNewRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned} from './r125-local-architecture-plan-owned.mjs';
+import {prepareR125StudioNewRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
 const input={model:'qwen3:14b',prompt:'自然光が入る小さな交流施設を作ってください。',headSha:'a'.repeat(40)};
 test('arbitrary brief prepares the real owned adapter without network and changes request hash',async()=>{
- const a=await prepareR125StudioNewRequest(input),b=await prepareR125StudioNewRequest({...input,prompt:'町の小さな図書館を作ってください。'});
+ let wire;
+ const a=await prepareR125StudioNewRequest(input,{onWireBody:body=>{wire=body;}}),b=await prepareR125StudioNewRequest({...input,prompt:'町の小さな図書館を作ってください。'});
  assert.equal(a.modelPostCount,0);assert.equal(a.headSha,input.headSha);
+ assert.equal(createHash('sha256').update(wire).digest('hex'),a.requestSha256);
+ assert.equal(JSON.parse(wire).model,input.model);assert.equal('wireBody' in a,false);
  assert.notEqual(a.requestSha256,b.requestSha256);assert.notEqual(a.briefSha256,b.briefSha256);
  await assert.rejects(prepareR125StudioNewRequest({...input,model:'unapproved'}));
 });
@@ -57,11 +60,13 @@ test('Studio owned path produces a real SOURCE receipt from the existing runner'
   },
   async stop(){stops++;return {ownerStopConfirmed:true,monitorStopConfirmed:true}}
  };
- const probe=async({sensor,architectureRequestSha256})=>({...sensor,status:'SAFE_FOR_ONE_REQUEST',
+ const probe=async({sensor,architectureRequestSha256,wireBody,mode})=>{
+  assert.equal(hash(wireBody),request.requestSha256);assert.equal(mode,'new');
+  return {...sensor,status:'SAFE_FOR_ONE_REQUEST',
   resourceSafetyCertified:true,inferenceMemoryPeakCalibrated:true,model:input.model,modelDigest:digest,
   contextLength:16384,maxOutputTokens:4096,calibrationProofSha256:'f'.repeat(64),
   architectureRequestSha256,headSha:request.headSha,resourceCalibrationId:'injected-test-only',
-  measuredAtEpochMs:Date.now(),sharedServiceIdle:true});
+  measuredAtEpochMs:Date.now(),sharedServiceIdle:true};};
  const fetcher=async(url,init)=>{
   if(init.method==='POST'){
    assert.equal(url,request.endpoint);assert.equal(hash(init.body),request.requestSha256);posts++;loaded=true;
@@ -87,7 +92,8 @@ test('Studio owned path produces a real SOURCE receipt from the existing runner'
   const result=await runR125ArchitecturePlanOwned({model:input.model,prompt,outDir},{
    controller,studioRequest:request,projectLease:{assertHeld:async()=>true},
    calibratedResourceProbe:probe,exactRequestApprovalVerifier:async x=>{
-    approval++;return x.requestSha256===request.requestSha256&&x.headSha===request.headSha&&
+    approval++;return hash(x.wireBody)===request.requestSha256&&x.mode==='new'&&x.modelDigest===digest&&
+     x.requestSha256===request.requestSha256&&x.headSha===request.headSha&&
      x.briefSha256===request.briefSha256&&x.outDir===outDir;
    },fetcher});
   assert.equal(posts,1);assert.equal(approval,1);assert.equal(stops,1);
@@ -100,4 +106,23 @@ test('Studio owned path produces a real SOURCE receipt from the existing runner'
   assert.ok(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')));
   assert.deepEqual(receipt.BuildPlan.operations,[]);assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+// A calibration using the existing cross-project lease must stop before HTTP
+// if its ownership is lost. No real controller or model is invoked.
+test('calibration project lease loss fails closed before any HTTP',async()=>{
+ let posts=0,stops=0;
+ const controller={headSha:input.headSha,configuredContextLength:16384,
+  configuredParallelRequests:1,configuredMaxLoadedModels:1,configuredKeepAliveSeconds:0,
+  cloudDisabled:true,configuredFlashAttention:false,configuredKvCacheType:'f16',
+  configuredGpuOverheadBytes:0,configuredScheduleSpread:false,configuredMaxQueue:1,
+  ollamaExecutableSha256:'a'.repeat(64),async checkResourceSafety(){throw Error('must not sample');},
+  async stop(){stops++;return {ownerStopConfirmed:true,monitorStopConfirmed:true};}};
+ for(const assertHeld of [async()=>false,async()=>{throw Error('lost');}]){
+  const r=await runR125ResourceCalibrationOwned({},{controller,projectLease:{assertHeld},
+   fetcher:async()=>{posts++;throw Error('must not fetch');}});
+  assert.equal(r.reason,'PROJECT_LEASE_LOST');assert.equal(r.status,'HOLD');
+  assert.equal(r.modelPostCount,0);assert.equal(r.resourceSafetyCertified,false);
+ }
+ assert.equal(posts,0);assert.equal(stops,2);
 });
