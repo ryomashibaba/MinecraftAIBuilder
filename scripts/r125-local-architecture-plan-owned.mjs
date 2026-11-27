@@ -983,23 +983,30 @@ export async function runR125ArchitecturePlanOwned(args,{
   ownedServiceStopConfirmed:true};
 }
 
-export function parseOwnedArgs(argv){
+export function parseOwnedArgs(argv,{revision=false}={}){
  const values={};
- if(argv.length!==6)throw Error('USAGE --model qwen3:14b --prompt TEXT --out PRIVATE_NEW_DIR');
+ if(revision?![8,10].includes(argv.length):argv.length!==6)
+  throw Error('OWNED_ARCHPLAN_ARGUMENTS_INVALID');
+ const allowed=['--model','--prompt','--out',...(revision?['--revise-plan','--revise-diagnosis']:[])];
  for(let i=0;i<argv.length;i+=2){
-  if(!['--model','--prompt','--out'].includes(argv[i])||values[argv[i]]||!argv[i+1])
+  if(!allowed.includes(argv[i])||Object.hasOwn(values,argv[i])||typeof argv[i+1]!=='string'||!argv[i+1].trim())
    throw Error('OWNED_ARCHPLAN_ARGUMENTS_INVALID');
   values[argv[i]]=argv[i+1];
  }
+ if(!['--model','--prompt','--out',...(revision?['--revise-plan']:[])].every(k=>Object.hasOwn(values,k)))
+  throw Error('OWNED_ARCHPLAN_ARGUMENTS_INVALID');
  if(values['--model']!==MODEL)throw Error('OWNED_ARCHPLAN_MODEL_NOT_APPROVED');
- return {model:values['--model'],prompt:values['--prompt'],outDir:values['--out']};
+ return {model:values['--model'],prompt:values['--prompt'],outDir:values['--out'],
+  ...(revision?{revisionPlanPath:path.resolve(values['--revise-plan']),
+   ...(values['--revise-diagnosis']?{revisionDiagnosisPath:path.resolve(values['--revise-diagnosis'])}:{})}:{})};
 }
 
 async function runOwnedCli(argv){
- const studio=argv[0]==='--studio-new';
+ const revision=argv[0]==='--studio-revision';
+ const studio=argv[0]==='--studio-new'||revision;
  const requestSha256=studio?argv[1]:null;
  if(studio&&!SHA256_RE.test(requestSha256??''))throw Error('STUDIO_EXACT_REQUEST_SHA_REQUIRED');
- const args=parseOwnedArgs(studio?argv.slice(2):argv);
+ const args=parseOwnedArgs(studio?argv.slice(2):argv,{revision});
  const privateModule=process.env.MAB_V7_PRIVATE_HOST_MODULE;
  const expectedHead=process.env.MAB_HEAD;
  const pythonExe=process.env.MAB_PYTHON_EXE;
@@ -1024,7 +1031,8 @@ async function runOwnedCli(argv){
     typeof bindings.verifyExactRequestApproval!=='function')
   throw Error('PRIVATE_CALIBRATION_AND_REQUEST_APPROVAL_REQUIRED');
  if(studio){
-  const request=await prepareR125StudioNewRequest({...args,headSha:expectedHead});
+  const prepare=revision?prepareR125StudioRevisionRequest:prepareR125StudioNewRequest;
+  const request=await prepare({...args,headSha:expectedHead});
   if(request.requestSha256!==requestSha256)throw Error('STUDIO_REQUEST_SHA_MISMATCH');
   args.outDir=path.resolve(args.outDir);ensurePrivateNewDirectory(args.outDir);
   // Thin binding to the ALREADY EXISTING cross-project operator lock.
@@ -1062,6 +1070,13 @@ async function runOwnedCli(argv){
       shaText(fs.readFileSync(path.join(args.outDir,'REQUEST_ORIGINAL.txt'),'utf8'))!==request.briefSha256||
       !fs.statSync(path.join(args.outDir,'B143_SOURCE_REVIEW_ONLY.json')).isFile())
     throw Error('STUDIO_RUN_ARTIFACT_MISMATCH');
+   if(revision){
+    const base=readR125RevisionInputs({revisionPlanPath:path.join(args.outDir,'REVISION_BASE_PLAN.json'),
+     revisionDiagnosisPath:request.sourceDiagnosisSha256===null?null:path.join(args.outDir,'REVISION_BASE_SOURCE_DIAGNOSIS.json')});
+    if(base.revisionBaseSha256!==request.basePlanSha256||base.revisionDiagnosisSha256!==request.sourceDiagnosisSha256||
+       saved.revisionBasePlanSha256!==request.basePlanSha256||saved.revisionDiagnosisSha256!==request.sourceDiagnosisSha256)
+     throw Error('STUDIO_REVISION_ARTIFACT_MISMATCH');
+   }
   }catch{result={...result,sourceVerified:false,reason:'STUDIO_RUN_ARTIFACT_MISMATCH'};}
   const receipt=summarizeR125StudioRun(request,result,args.outDir,released);
   console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
@@ -1165,14 +1180,16 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  try{
   const argv=process.argv.slice(2);
   if(argv[0]==='--calibrate')await runOwnedCalibrationCli(argv.slice(1));
-  else if(argv[0]==='--prepare-studio-new'){
-   const args=parseOwnedArgs(argv.slice(1));
-   console.log(JSON.stringify(await prepareR125StudioNewRequest({...args,headSha:process.env.MAB_HEAD})));
+  else if(['--prepare-studio-new','--prepare-studio-revision'].includes(argv[0])){
+   const revision=argv[0]==='--prepare-studio-revision';
+   const args=parseOwnedArgs(argv.slice(1),{revision});
+   const prepare=revision?prepareR125StudioRevisionRequest:prepareR125StudioNewRequest;
+   console.log(JSON.stringify(await prepare({...args,headSha:process.env.MAB_HEAD})));
   }else await runOwnedCli(argv);
  }
  catch(error){
-  if(['--studio-new','--prepare-studio-new'].includes(process.argv[2]))
-   console.log(JSON.stringify({schema:'r125-studio-owned-result-v1',mode:'new',status:'HOLD',
+  if(['--studio-new','--prepare-studio-new','--studio-revision','--prepare-studio-revision'].includes(process.argv[2]))
+   console.log(JSON.stringify({schema:'r125-studio-owned-result-v1',mode:process.argv[2].endsWith('-revision')?'revision':'new',status:'HOLD',
     reason:String(error?.message??'R125_OWNED_ARCHPLAN_HOLD').slice(0,160),runPath:null,sourceVerified:false,
     modelPostCount:0,automaticRetries:0,worldContacts:0,worldWrites:0}));
   else console.error('R125_OWNED_ARCHPLAN_HOLD');

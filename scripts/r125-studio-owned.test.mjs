@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {prepareR125StudioNewRequest,prepareR125StudioRevisionRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+import {parseOwnedArgs,prepareR125StudioNewRequest,prepareR125StudioRevisionRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
 const input={model:'qwen3:14b',prompt:'自然光が入る小さな交流施設を作ってください。',headSha:'a'.repeat(40)};
 test('arbitrary brief prepares the real owned adapter without network and changes request hash',async()=>{
  let wire;
@@ -165,5 +167,31 @@ test('offline revision preparation binds exact base and revision request without
   fs.writeFileSync(diagPath,JSON.stringify({status:'SOURCE_PASS',sourceVerified:true,compilerReason:null}));
   await assert.rejects(prepareR125StudioRevisionRequest({...input,prompt,revisionPlanPath:planPath,revisionDiagnosisPath:diagPath}),/INVALID_REVISION_SOURCE_DIAGNOSIS/);
   await assert.rejects(prepareR125StudioRevisionRequest({...input,prompt,revisionPlanPath:path.join(root,'missing.json')}),/INVALID_REVISION_BASE_PLAN/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+
+test('revision CLI prepares the exact request without starting a service or writing output',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-revision-cli-'));
+ try{
+  const base=path.join(root,'base.json'),outDir=path.join(root,'new-run');
+  fs.copyFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),base);
+  const original=fs.readFileSync(base,'utf8');
+  const args=['--model',input.model,'--prompt',input.prompt,'--out',outDir,'--revise-plan',base];
+  const parsed=parseOwnedArgs(args,{revision:true});
+  assert.equal(parsed.revisionPlanPath,base);
+  assert.throws(()=>parseOwnedArgs(args),/ARGUMENTS_INVALID/);
+  assert.throws(()=>parseOwnedArgs(args.slice(0,6),{revision:true}),/ARGUMENTS_INVALID/);
+  assert.throws(()=>parseOwnedArgs([...args,'--revise-plan',base],{revision:true}),/ARGUMENTS_INVALID/);
+  assert.throws(()=>parseOwnedArgs([...args.slice(0,6),'--revise-diagnosis',base],{revision:true}),/ARGUMENTS_INVALID/);
+  const cli=fileURLToPath(new URL('./r125-local-architecture-plan-owned.mjs',import.meta.url));
+  const invoke=(...argv)=>spawnSync(process.execPath,[cli,...argv],{encoding:'utf8',timeout:10000,env:{...process.env,MAB_HEAD:input.headSha}});
+  const prep=invoke('--prepare-studio-revision',...args);
+  assert.equal(prep.status,0,prep.stdout+prep.stderr);
+  assert.deepEqual(JSON.parse(prep.stdout),await prepareR125StudioRevisionRequest({...parsed,headSha:input.headSha}));
+  const rejected=invoke('--studio-revision','invalid-sha',...args);
+  assert.equal(rejected.status,2);
+  const receipt=JSON.parse(rejected.stdout);assert.equal(receipt.mode,'revision');assert.equal(receipt.modelPostCount,0);assert.equal(receipt.status,'HOLD');
+  assert.equal(fs.existsSync(outDir),false);assert.equal(fs.readFileSync(base,'utf8'),original);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
