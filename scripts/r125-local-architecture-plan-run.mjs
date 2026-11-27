@@ -170,7 +170,7 @@ export function fetchR125LongLocalCompletion(url,options={}){
 
 const globalTrialLock=()=>path.resolve(ROOT,'..','..',
  '.mab-r125-local-model-trial.lock');
-function acquireLocalTrialLock(){
+export function acquireLocalTrialLock(){
  const lock=globalTrialLock(),token=randomUUID(),pid=process.pid;
  for(let attempt=0;attempt<2;attempt++){
   try{

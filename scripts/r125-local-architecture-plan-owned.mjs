@@ -11,7 +11,8 @@ import {spawn,execFileSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {randomBytes,createHash} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {runR125LocalArchitecturePlan} from './r125-local-architecture-plan-run.mjs';
+import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirectory} from './r125-local-architecture-plan-run.mjs';
+import {createR125ArchitecturePlanLocalAdapter} from '../source/ai/b198g-local-model-adapter.mjs';
 import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -258,7 +259,7 @@ export async function createWindowsOwnedOllamaController({
  }
 }
 
-const calibratedClearance=(sample,service,now)=>
+const calibratedClearance=(sample,service,now,architectureRequestSha256=ARCHPLAN_REQUEST_SHA256)=>
  sample?.status==='SAFE_FOR_ONE_REQUEST'&&
  sample?.resourceSafetyCertified===true&&
  sample?.inferenceMemoryPeakCalibrated===true&&
@@ -267,7 +268,7 @@ const calibratedClearance=(sample,service,now)=>
  sample?.maxOutputTokens===MAX_OUTPUT_TOKENS&&
  typeof sample?.calibrationProofSha256==='string'&&
  /^[a-f0-9]{64}$/.test(sample.calibrationProofSha256)&&
- sample?.architectureRequestSha256===ARCHPLAN_REQUEST_SHA256&&
+ sample?.architectureRequestSha256===architectureRequestSha256&&
  service.configuredContextLength===CONTEXT_LENGTH&&
  service.configuredParallelRequests===1&&
  service.configuredMaxLoadedModels===1&&
@@ -616,29 +617,92 @@ export async function runR125ResourceCalibrationOwned({
  * the integrated-semantic V7 IR runner. This gate refuses before POST unless
  * the PRIVATE, model-calibrated probe attests the exact owned service.
  */
+const SHA256_RE=/^[a-f0-9]{64}$/;
+const OWNED_ENDPOINT='http://127.0.0.1:11435/v1/chat/completions';
+const shaText=text=>createHash('sha256').update(text).digest('hex');
+/** Offline preparation uses the SAME adapter and settings as owned execution.
+ * The injected transport only captures bytes and refuses, never calls HTTP. */
+export async function prepareR125StudioNewRequest({model,prompt,headSha}={}){
+ if(model!==MODEL||typeof prompt!=='string'||prompt.length<8||prompt.length>8000||
+    !HEAD_RE.test(headSha??''))throw Error('STUDIO_NEW_REQUEST_INVALID');
+ let exact=null;
+ const author=createR125ArchitecturePlanLocalAdapter({model,endpoint:OWNED_ENDPOINT,
+  maxOutputTokens:MAX_OUTPUT_TOKENS,onRawModelResponse:()=>{},
+  fetcher:async(url,init)=>{
+   if(exact!==null||url!==OWNED_ENDPOINT||init.method!=='POST'||init.redirect!=='error')
+    throw Error('STUDIO_PREPARE_BOUNDARY');
+   exact=String(init.body);return {ok:false,status:418};
+  }});
+ try{await author({prompt});throw Error('STUDIO_PREPARE_UNEXPECTED_SUCCESS');}
+ catch(error){if(exact===null||!String(error?.message).includes('LOCAL_HTTP_418'))throw error;}
+ return {schema:'r125-studio-new-request-v1',mode:'new',headSha,model,
+  briefSha256:shaText(prompt),requestSha256:shaText(exact),endpoint:OWNED_ENDPOINT,
+  maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
+}
+/** Receipt is emitted only after the existing owned lifecycle has settled.
+ * A runner SOURCE report alone must not trigger Studio import. */
+export function summarizeR125StudioRun(request,result,runPath,lockReleased){
+ const settled=result?.modelPostCount===1&&result.unloadConfirmed===true&&
+  result.ownedServiceStopConfirmed===true&&result.monitorStopConfirmed===true&&lockReleased===true;
+ const ready=settled&&result.sourceVerified===true&&
+  result.requestSha256===request.briefSha256&&result.model===request.model&&
+  SHA256_RE.test(result.sourceSha256??'')&&SHA256_RE.test(result.geometrySha256??'');
+ return {schema:'r125-studio-owned-result-v1',mode:'new',
+  status:ready?'SOURCE_READY_REVIEW_ONLY':result?.reason==='MONITOR_INTERRUPTED'?'INTERRUPTED':'HOLD',
+  reason:ready?null:result?.reason??result?.status??'EXECUTION_NOT_SETTLED',
+  headSha:request.headSha,model:request.model,modelDigest:MODEL_DIGEST,
+  briefSha256:request.briefSha256,requestSha256:request.requestSha256,
+  runPath:ready?runPath:null,sourceVerified:ready,
+  sourceSha256:ready?result.sourceSha256:null,geometrySha256:ready?result.geometrySha256:null,
+  modelPostCount:result?.modelPostCount??0,automaticRetries:0,
+  unloadConfirmed:result?.unloadConfirmed===true,ownedServiceStopConfirmed:result?.ownedServiceStopConfirmed===true,
+  monitorStopConfirmed:result?.monitorStopConfirmed===true,projectLockReleased:lockReleased===true,
+  artStatus:'NOT_REVIEWED',worldContacts:0,worldWrites:0,constructionApproved:false,
+  executionAllowed:false,BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED')};
+}
+
 export async function runR125ArchitecturePlanOwned(args,{
  controller,calibratedResourceProbe=null,runner=runR125LocalArchitecturePlan,
- fetcher=fetch,exactRequestApprovalVerifier=null,now=()=>Date.now(),timeoutMs=180000
+ fetcher=fetch,exactRequestApprovalVerifier=null,now=()=>Date.now(),timeoutMs=180000,
+ studioRequest=null,projectLease=null
 }={}){
  if(args?.repairOnce===true)return hold('OWNED_RUNNER_RETRY_FORBIDDEN');
- if(typeof args?.prompt!=='string'||!/(?:entry\s*[.:]\s*shelterDepth\s*[:=：]\s*3|entry\.shelterDepth\s*[:=：]\s*3)/i.test(args.prompt))
+ if(studioRequest===null&&(typeof args?.prompt!=='string'||!/(?:entry\s*[.:]\s*shelterDepth\s*[:=：]\s*3|entry\.shelterDepth\s*[:=：]\s*3)/i.test(args.prompt)))
   return hold('SHELTER_DEPTH_3_MUST_BE_IN_ORIGINAL_BRIEF');
  if(!controller||typeof controller.checkResourceSafety!=='function'||
     typeof controller.stop!=='function'||!Number.isSafeInteger(controller.servicePid))
   return hold('OWNED_SERVICE_CONTROLLER_REQUIRED');
  const service=controller;
+ const studio=studioRequest!==null;
+ const expectedRequest=studio?studioRequest.requestSha256:ARCHPLAN_REQUEST_SHA256;
+ if(studio){
+  let valid=false;
+  try{
+   const prepared=await prepareR125StudioNewRequest({model:args.model,prompt:args.prompt,headSha:service.headSha});
+   valid=JSON.stringify(prepared)===JSON.stringify(studioRequest)&&
+    Object.keys(args).every(k=>['model','prompt','outDir'].includes(k))&&
+    typeof projectLease?.assertHeld==='function'&&await projectLease.assertHeld()===true;
+  }catch{}
+  if(!valid){
+   const stopped=await service.stop('STUDIO_REQUEST_OR_PROJECT_LEASE_UNVERIFIED');
+   return hold('STUDIO_REQUEST_OR_PROJECT_LEASE_UNVERIFIED',{
+    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
+    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
+  }
+ }
  const attest=async phase=>{
-  const sensor=await service.checkResourceSafety({phase,model:MODEL,
-   headSha:service.headSha});
+  if(studio&&await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+  const sensor=await service.checkResourceSafety({phase,model:MODEL,headSha:service.headSha});
+  if(studio&&!ownedSamplePass(sensor,service,phase,now()))return hold('RESOURCE_OR_HEARTBEAT_HOLD');
   if(!calibratedResourceProbe)return sensor;
   const calibrated=await calibratedResourceProbe({sensor,service,phase,model:MODEL,
-   headSha:service.headSha});
-  if(!calibratedClearance(calibrated,service,now()))return sensor;
+   headSha:service.headSha,...(studio?{architectureRequestSha256:expectedRequest}: {})});
+  if(!calibratedClearance(calibrated,service,now(),expectedRequest))return sensor;
   return calibrated;
  };
  let pre;
  try{pre=await attest('PRE_POST');}catch{pre=null;}
- if(!calibratedClearance(pre,service,now())){
+ if(!calibratedClearance(pre,service,now(),expectedRequest)){
   const stopped=await service.stop('UNCALIBRATED_PRE_POST_HOLD');
   return hold(pre?.reason??'QWEN_PEAK_CALIBRATION_REQUIRED',{
    observedResourcesMiB:pre?.observedResourcesMiB??null,
@@ -674,7 +738,7 @@ export async function runR125ArchitecturePlanOwned(args,{
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
  }
- let posts=0,monitorFault=false,previous=pre;
+ let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null;
  const monitoredFetch=async(url,init={})=>{
   if(url!=='http://127.0.0.1:11435/v1/chat/completions'||
      init.method!=='POST'||posts!==0){
@@ -685,16 +749,17 @@ export async function runR125ArchitecturePlanOwned(args,{
    let outgoing;
    try{outgoing=JSON.parse(String(init.body??''));}catch{outgoing=null;}
    if(typeof exactRequestApprovalVerifier!=='function'||
-      requestSha256!==ARCHPLAN_REQUEST_SHA256||
+      requestSha256!==expectedRequest||
       outgoing?.model!==MODEL||outgoing?.max_tokens!==MAX_OUTPUT_TOKENS||
      await exactRequestApprovalVerifier({requestSha256,model:MODEL,
        headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0,
-       purpose:'ARCHITECTURE_PLAN',contextLength:CONTEXT_LENGTH,
+       purpose:'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir}:{}),contextLength:CONTEXT_LENGTH,
        maxOutputTokens:MAX_OUTPUT_TOKENS,
        calibrationProofSha256:pre.calibrationProofSha256})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
    throw Error('EXACT_ARCHPLAN_REQUEST_APPROVAL_REQUIRED');
   }
+  if(studio&&await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
   posts++;
   const stopController=new AbortController();
   const signal=init.signal?AbortSignal.any([init.signal,stopController.signal]):stopController.signal;
@@ -702,7 +767,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   const fault=reason=>{
    if(closed)return;
    monitorFault=true;stopController.abort();
-   void service.stop(reason);
+   faultStop=Promise.resolve(service.stop(reason)).catch(()=>null);
   };
   if(init.signal){
    if(init.signal.aborted)fault('MODEL_REQUEST_ABORTED');
@@ -711,16 +776,32 @@ export async function runR125ArchitecturePlanOwned(args,{
   const pulse=setInterval(()=>{
    if(pending||closed)return;
    pending=true;
-   Promise.resolve().then(()=>attest('DURING_INFERENCE')).then(sample=>{
-    if(!calibratedClearance(sample,service,now())||
+   Promise.resolve().then(()=>attest('DURING_INFERENCE')).then(async sample=>{
+    if(studio){
+     const [active,shared]=await Promise.all([
+      jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
+      jsonObject(fetcher,'http://127.0.0.1:11434/api/ps')]);
+     if(!Array.isArray(shared?.models)||shared.models.length!==0)throw Error('SHARED_SERVICE_BECAME_BUSY');
+     if(exactLoadedModel(active))loadedSeen=true;
+     else if(!Array.isArray(active?.models)||active.models.length!==0)throw Error('LOADED_MODEL_IDENTITY_MISMATCH');
+    }
+    if(!calibratedClearance(sample,service,now(),expectedRequest)||
        sample.monitorHeartbeatEpochMs<=previous.monitorHeartbeatEpochMs||
        sample.monitorSequence<=previous.monitorSequence)
      fault('RESOURCE_OR_HEARTBEAT_HOLD');
     else previous=sample;
    }).catch(()=>fault('RESOURCE_MONITOR_FAILED')).finally(()=>{pending=false;});
   },1000);
-  try{return await fetcher(url,{...init,signal});}
-  finally{closed=true;clearInterval(pulse);}
+  try{
+   const response=await fetcher(url,{...init,signal});
+   if(!studio)return response;
+   // Fetch resolves at headers. Keep the EXISTING monitor alive until the
+   // entire response body has arrived, not just until headers are returned.
+   const raw=await response.text();
+   if(monitorFault||signal.aborted)throw Error('OWNED_MODEL_RESPONSE_INTERRUPTED');
+   return {ok:response.ok,status:response.status,json:async()=>JSON.parse(raw)};
+  }finally{closed=true;clearInterval(pulse);}
+
  };
  let result;
  try{
@@ -729,6 +810,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  }catch(error){
   result=hold('ARCHITECTURE_PLAN_RUN_FAILED',{reasonDetail:String(error?.message??error).slice(0,160)});
  }
+ if(faultStop)await faultStop;
  let unloadConfirmed=false;
  if(posts===1&&!monitorFault){
   try{
@@ -748,6 +830,10 @@ export async function runR125ArchitecturePlanOwned(args,{
     monitorStopConfirmed:stop?.monitorStopConfirmed===true,
     sourceStatus:result?.status??null});
  }
+ if(studio){
+  if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null});
+  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true};
+ }
  try{
   const raw=fs.readFileSync(path.join(args.outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
   const author=JSON.parse(raw);
@@ -761,7 +847,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   ownedServiceStopConfirmed:true};
 }
 
-function parseOwnedArgs(argv){
+export function parseOwnedArgs(argv){
  const values={};
  if(argv.length!==6)throw Error('USAGE --model qwen3:14b --prompt TEXT --out PRIVATE_NEW_DIR');
  for(let i=0;i<argv.length;i+=2){
@@ -774,7 +860,10 @@ function parseOwnedArgs(argv){
 }
 
 async function runOwnedCli(argv){
- const args=parseOwnedArgs(argv);
+ const studio=argv[0]==='--studio-new';
+ const requestSha256=studio?argv[1]:null;
+ if(studio&&!SHA256_RE.test(requestSha256??''))throw Error('STUDIO_EXACT_REQUEST_SHA_REQUIRED');
+ const args=parseOwnedArgs(studio?argv.slice(2):argv);
  const privateModule=process.env.MAB_V7_PRIVATE_HOST_MODULE;
  const expectedHead=process.env.MAB_HEAD;
  const pythonExe=process.env.MAB_PYTHON_EXE;
@@ -798,6 +887,34 @@ async function runOwnedCli(argv){
  if(typeof bindings.calibratedResourceProbe!=='function'||
     typeof bindings.verifyExactRequestApproval!=='function')
   throw Error('PRIVATE_CALIBRATION_AND_REQUEST_APPROVAL_REQUIRED');
+ if(studio){
+  const request=await prepareR125StudioNewRequest({...args,headSha:expectedHead});
+  if(request.requestSha256!==requestSha256)throw Error('STUDIO_REQUEST_SHA_MISMATCH');
+  args.outDir=path.resolve(args.outDir);ensurePrivateNewDirectory(args.outDir);
+  // Thin binding to the ALREADY EXISTING cross-project operator lock.
+  // No new lease store/monitor; no GET-only substitute. Absent binding HOLD.
+  if(typeof bindings.acquireProjectModelLock!=='function')
+   throw Error('EXISTING_PROJECT_MODEL_LOCK_BINDING_REQUIRED');
+  let lease=null,controller=null,result=hold('STUDIO_NOT_STARTED'),released=false;
+  const releaseLocal=acquireLocalTrialLock();
+  try{
+   lease=await bindings.acquireProjectModelLock(request);
+   if(typeof lease?.assertHeld!=='function'||typeof lease?.release!=='function'||await lease.assertHeld()!==true)
+    throw Error('PROJECT_MODEL_LOCK_NOT_ACQUIRED');
+   controller=await createWindowsOwnedOllamaController({pythonExe,ollamaExe,expectedHead,repoRoot:ROOT});
+   result=await runR125ArchitecturePlanOwned(args,{controller,studioRequest:request,projectLease:lease,
+    calibratedResourceProbe:bindings.calibratedResourceProbe,exactRequestApprovalVerifier:bindings.verifyExactRequestApproval});
+  }catch(error){
+   if(controller)try{await controller.stop('STUDIO_RUN_EXCEPTION');}catch{}
+   result=hold(String(error?.message??'STUDIO_RUN_EXCEPTION').slice(0,160));
+  }finally{
+   if(lease&&typeof lease.release==='function')try{released=await lease.release()===true;}catch{}
+   releaseLocal();
+  }
+  const receipt=summarizeR125StudioRun(request,result,args.outDir,released);
+  console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
+  return;
+ }
  const controller=await createWindowsOwnedOllamaController({
   pythonExe,ollamaExe,expectedHead,repoRoot:ROOT});
  const result=await runR125ArchitecturePlanOwned(args,{controller,
@@ -858,7 +975,10 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  try{
   const argv=process.argv.slice(2);
   if(argv[0]==='--calibrate')await runOwnedCalibrationCli(argv.slice(1));
-  else await runOwnedCli(argv);
+  else if(argv[0]==='--prepare-studio-new'){
+   const args=parseOwnedArgs(argv.slice(1));
+   console.log(JSON.stringify(await prepareR125StudioNewRequest({...args,headSha:process.env.MAB_HEAD})));
+  }else await runOwnedCli(argv);
  }
  catch{console.error('R125_OWNED_ARCHPLAN_HOLD');process.exitCode=2;}
 }
