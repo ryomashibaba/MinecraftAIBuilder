@@ -761,24 +761,28 @@ export async function runR125ArchitecturePlanOwned(args,{
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
    throw Error('EXACT_ARCHPLAN_REQUEST_APPROVAL_REQUIRED');
   }
-  if(studio&&await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+  if(studio){
+   if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+   if(init.signal?.aborted)throw Error('MODEL_REQUEST_ABORTED');
+   if(!calibratedClearance(previous,service,now(),expectedRequest))throw Error('PRE_POST_CLEARANCE_EXPIRED');
+  }
   posts++;
   const stopController=new AbortController();
   const signal=init.signal?AbortSignal.any([init.signal,stopController.signal]):stopController.signal;
-  let pending=false,closed=false;
+  let pending=null,closed=false;
   const fault=reason=>{
-   if(closed)return;
+   if(closed||monitorFault)return;
    monitorFault=true;stopController.abort();
    faultStop=Promise.resolve(service.stop(reason)).catch(()=>null);
   };
+  const abortFromCaller=()=>fault('MODEL_REQUEST_ABORTED');
   if(init.signal){
-   if(init.signal.aborted)fault('MODEL_REQUEST_ABORTED');
-   else init.signal.addEventListener('abort',()=>fault('MODEL_REQUEST_ABORTED'),{once:true});
+   if(init.signal.aborted)abortFromCaller();
+   else init.signal.addEventListener('abort',abortFromCaller,{once:true});
   }
   const pulse=setInterval(()=>{
    if(pending||closed)return;
-   pending=true;
-   Promise.resolve().then(()=>attest('DURING_INFERENCE')).then(async sample=>{
+   pending=Promise.resolve().then(()=>attest('DURING_INFERENCE')).then(async sample=>{
     if(studio){
      const [active,shared]=await Promise.all([
       jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
@@ -792,7 +796,7 @@ export async function runR125ArchitecturePlanOwned(args,{
        sample.monitorSequence<=previous.monitorSequence)
      fault('RESOURCE_OR_HEARTBEAT_HOLD');
     else previous=sample;
-   }).catch(()=>fault('RESOURCE_MONITOR_FAILED')).finally(()=>{pending=false;});
+   }).catch(()=>fault('RESOURCE_MONITOR_FAILED')).finally(()=>{pending=null;});
   },1000);
   try{
    const response=await fetcher(url,{...init,signal});
@@ -800,9 +804,19 @@ export async function runR125ArchitecturePlanOwned(args,{
    // Fetch resolves at headers. Keep the EXISTING monitor alive until the
    // entire response body has arrived, not just until headers are returned.
    const raw=await response.text();
+   clearInterval(pulse);
+   // A sample already in flight must settle before accepting the body.
+   // Otherwise a late lease/resource failure can be ignored at completion.
+   if(pending)await pending;
+   if(await projectLease.assertHeld()!==true)fault('PROJECT_LEASE_LOST');
    if(monitorFault||signal.aborted)throw Error('OWNED_MODEL_RESPONSE_INTERRUPTED');
    return {ok:response.ok,status:response.status,json:async()=>JSON.parse(raw)};
-  }finally{closed=true;clearInterval(pulse);}
+  }finally{
+   clearInterval(pulse);
+   if(studio&&pending)await pending;
+   closed=true;
+   if(studio)init.signal?.removeEventListener('abort',abortFromCaller);
+  }
 
  };
  let result;
@@ -827,7 +841,13 @@ export async function runR125ArchitecturePlanOwned(args,{
     !body.models.some(entry=>entry?.name===MODEL);
   }catch{}
  }
- const stop=await service.stop(unloadConfirmed?'POST_COMPLETE_UNLOADED':'UNLOAD_UNCONFIRMED');
+ let stop;
+ try{stop=await service.stop(unloadConfirmed?'POST_COMPLETE_UNLOADED':'UNLOAD_UNCONFIRMED');}
+ catch{stop=null;}
+ if(studio&&posts===0)
+  return hold(result?.reason??'NO_MODEL_POST',{
+   modelPostCount:0,unloadConfirmed:false,ownedServiceStopConfirmed:stop?.ownerStopConfirmed===true,
+   monitorStopConfirmed:stop?.monitorStopConfirmed===true,sourceStatus:result?.status??null});
  if(posts>1||monitorFault||!unloadConfirmed||
     stop?.ownerStopConfirmed!==true||stop?.monitorStopConfirmed!==true){
   return hold(monitorFault?'MONITOR_INTERRUPTED':!unloadConfirmed?
