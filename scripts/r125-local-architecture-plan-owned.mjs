@@ -732,9 +732,16 @@ export async function runR125ArchitecturePlanOwned(args,{
     monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
   }
  }
- const attest=async phase=>{
-  if(studio&&await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
-  const sensor=await service.checkResourceSafety({phase,model:MODEL,headSha:service.headSha});
+ const attest=async (phase,{waitForNewSequence=false}={})=>{
+  let sensor;
+  const deadline=Date.now()+3000;
+  for(;;){
+   if(studio&&await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+   sensor=await service.checkResourceSafety({phase,model:MODEL,headSha:service.headSha,waitForNewSequence});
+   if(!waitForNewSequence||sensor?.reason!=='MONITOR_SEQUENCE_NOT_ADVANCED')break;
+   if(Date.now()>=deadline)throw Error('PRE_POST_MONITOR_SEQUENCE_TIMEOUT');
+   await delay(50);
+  }
   if(studio&&!ownedSamplePass(sensor,service,phase,now()))return hold('RESOURCE_OR_HEARTBEAT_HOLD');
   if(!calibratedResourceProbe)return sensor;
   const calibrated=await calibratedResourceProbe({sensor,service,phase,model:MODEL,
@@ -755,9 +762,23 @@ export async function runR125ArchitecturePlanOwned(args,{
   // Identity and idle checks are GET-only. Shared 11434 is queried read-only
   // for an idle check; this path never posts to or stops that service.
  try{
-  const tagsResponse=await fetcher('http://127.0.0.1:11435/api/tags',
-   {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
-  const tags=tagsResponse?.ok?await tagsResponse.json():null;
+  let tags;
+  if(studio){
+   try{tags=await preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/tags','OWNED_TAGS');}
+   catch(error){
+    if(error?.message!=='PREFLIGHT_OWNED_TAGS_TIMEOUT')throw error;
+    const fresh=await attest('PRE_POST',{waitForNewSequence:true});
+    if(!calibratedClearance(fresh,service,now(),expectedRequest)||
+       fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
+    pre=fresh;
+    if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+    tags=await preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/tags','OWNED_TAGS',10000);
+   }
+  }else{
+   const tagsResponse=await fetcher('http://127.0.0.1:11435/api/tags',
+    {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
+   tags=tagsResponse?.ok?await tagsResponse.json():null;
+  }
   const matches=tags?.models?.filter(entry=>entry?.name===MODEL)??[];
   const psResponse=await fetcher('http://127.0.0.1:11435/api/ps',
    {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
@@ -774,6 +795,14 @@ export async function runR125ArchitecturePlanOwned(args,{
     ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
     monitorStopConfirmed:stopped?.monitorStopConfirmed===true,
     sharedServiceTouched:false});
+  }
+  // GET readiness can outlast the three-second clearance. Obtain a new
+  // independently measured clearance; never extend the old one.
+  if(studio){
+   const fresh=await attest('PRE_POST',{waitForNewSequence:true});
+   if(!calibratedClearance(fresh,service,now(),expectedRequest)||
+      fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
+   pre=fresh;
   }
  }catch{
   const stopped=await service.stop('OWNED_MODEL_PREFLIGHT_FAILED');
