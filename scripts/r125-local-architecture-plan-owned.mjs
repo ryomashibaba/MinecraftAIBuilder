@@ -11,7 +11,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {randomBytes,createHash} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirectory} from './r125-local-architecture-plan-run.mjs';
+import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirectory,readR125RevisionInputs} from './r125-local-architecture-plan-run.mjs';
 import {createR125ArchitecturePlanLocalAdapter} from '../source/ai/b198g-local-model-adapter.mjs';
 import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
 
@@ -660,6 +660,14 @@ const shaText=text=>createHash('sha256').update(text).digest('hex');
 export async function prepareR125StudioNewRequest({model,prompt,headSha}={}, {onWireBody=null}={}){
  if(model!==MODEL||typeof prompt!=='string'||prompt.length<8||prompt.length>8000||
     !HEAD_RE.test(headSha??''))throw Error('STUDIO_NEW_REQUEST_INVALID');
+ const exact=await captureR125StudioWire({model,prompt});
+ if(onWireBody!==null)await onWireBody(exact);
+ return {schema:'r125-studio-new-request-v1',mode:'new',headSha,model,
+  briefSha256:shaText(prompt),requestSha256:shaText(exact),endpoint:OWNED_ENDPOINT,
+  maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
+}
+
+async function captureR125StudioWire({model,prompt,revisionContext=null}){
  let exact=null;
  const author=createR125ArchitecturePlanLocalAdapter({model,endpoint:OWNED_ENDPOINT,
   maxOutputTokens:MAX_OUTPUT_TOKENS,onRawModelResponse:()=>{},
@@ -668,14 +676,28 @@ export async function prepareR125StudioNewRequest({model,prompt,headSha}={}, {on
     throw Error('STUDIO_PREPARE_BOUNDARY');
    exact=String(init.body);return {ok:false,status:418};
   }});
- try{await author({prompt});throw Error('STUDIO_PREPARE_UNEXPECTED_SUCCESS');}
+ try{await author({prompt,...(revisionContext?{revisionContext}:{})});throw Error('STUDIO_PREPARE_UNEXPECTED_SUCCESS');}
  catch(error){if(exact===null||!String(error?.message).includes('LOCAL_HTTP_418'))throw error;}
- // Only the in-process PRIVATE verifier needs the exact payload to determine
- // calibrated input scope. Never expose it in CLI stdout or the public receipt.
+ return exact;
+}
+
+/** Offline-only revision preparation; uses the actual adapter and the existing
+ * runner's input validation. No execution entry, HTTP, artifact writes or approval. */
+export async function prepareR125StudioRevisionRequest({model,prompt,headSha,
+ revisionPlanPath,revisionDiagnosisPath=null}={}, {onWireBody=null}={}){
+ if(model!==MODEL||typeof prompt!=='string'||prompt.length<8||prompt.length>8000||
+    !HEAD_RE.test(headSha??'')||typeof revisionPlanPath!=='string'||!revisionPlanPath.trim())
+  throw Error('STUDIO_REVISION_REQUEST_INVALID');
+ const {revisionBase,revisionBaseSha256,revisionDiagnosis,revisionDiagnosisSha256}=
+  readR125RevisionInputs({revisionPlanPath,revisionDiagnosisPath});
+ const exact=await captureR125StudioWire({model,prompt,revisionContext:{
+  previousArchitecturePlan:revisionBase,revisionRequest:prompt,
+  ...(revisionDiagnosis?{sourceDiagnosis:revisionDiagnosis}:{})}});
  if(onWireBody!==null)await onWireBody(exact);
- return {schema:'r125-studio-new-request-v1',mode:'new',headSha,model,
-  briefSha256:shaText(prompt),requestSha256:shaText(exact),endpoint:OWNED_ENDPOINT,
-  maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
+ return {schema:'r125-studio-revision-request-v1',mode:'revision',headSha,model,
+  briefSha256:shaText(prompt),requestSha256:shaText(exact),
+  basePlanSha256:revisionBaseSha256,sourceDiagnosisSha256:revisionDiagnosisSha256,
+  endpoint:OWNED_ENDPOINT,maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
 }
 /** Receipt is emitted only after the existing owned lifecycle has settled.
  * A runner SOURCE report alone must not trigger Studio import. */
@@ -683,10 +705,14 @@ export function summarizeR125StudioRun(request,result,runPath,lockReleased){
  const settled=result?.modelPostCount===1&&result.unloadConfirmed===true&&
   result.ownedServiceStopConfirmed===true&&result.monitorStopConfirmed===true&&
   result.loadedModelObserved===true&&lockReleased===true;
- const ready=settled&&result.sourceVerified===true&&
+ const revision=request.mode==='revision';
+ const revisionMatches=!revision||result?.revisionBasePlanSha256===request.basePlanSha256&&
+  result?.revisionDiagnosisSha256===request.sourceDiagnosisSha256;
+ const ready=settled&&revisionMatches&&result.sourceVerified===true&&
   result.requestSha256===request.briefSha256&&result.model===request.model&&
   SHA256_RE.test(result.sourceSha256??'')&&SHA256_RE.test(result.geometrySha256??'');
- return {schema:'r125-studio-owned-result-v1',mode:'new',
+ return {schema:'r125-studio-owned-result-v1',mode:request.mode,
+  ...(revision?{basePlanSha256:request.basePlanSha256,sourceDiagnosisSha256:request.sourceDiagnosisSha256}:{}),
   status:ready?'SOURCE_READY_REVIEW_ONLY':result?.reason==='MONITOR_INTERRUPTED'?'INTERRUPTED':'HOLD',
   reason:ready?null:result?.reason??result?.status??'EXECUTION_NOT_SETTLED',
   headSha:request.headSha,model:request.model,modelDigest:MODEL_DIGEST,
@@ -714,15 +740,18 @@ export async function runR125ArchitecturePlanOwned(args,{
   return hold('OWNED_SERVICE_CONTROLLER_REQUIRED');
  const service=controller;
  const studio=studioRequest!==null;
+ const revision=studio&&studioRequest.mode==='revision';
  const expectedRequest=studio?studioRequest.requestSha256:ARCHPLAN_REQUEST_SHA256;
  let studioWireBody=null;
  if(studio){
   let valid=false;
   try{
-   const prepared=await prepareR125StudioNewRequest({model:args.model,prompt:args.prompt,headSha:service.headSha},
+   const prepare=revision?prepareR125StudioRevisionRequest:prepareR125StudioNewRequest;
+   const prepared=await prepare({model:args.model,prompt:args.prompt,headSha:service.headSha,
+    ...(revision?{revisionPlanPath:args.revisionPlanPath,revisionDiagnosisPath:args.revisionDiagnosisPath??null}:{})},
     {onWireBody:body=>{studioWireBody=body;}});
    valid=JSON.stringify(prepared)===JSON.stringify(studioRequest)&&
-    Object.keys(args).every(k=>['model','prompt','outDir'].includes(k))&&
+    Object.keys(args).every(k=>['model','prompt','outDir',...(revision?['revisionPlanPath','revisionDiagnosisPath']:[])].includes(k))&&
     typeof projectLease?.assertHeld==='function'&&await projectLease.assertHeld()===true;
   }catch{}
   if(!valid){
@@ -746,7 +775,8 @@ export async function runR125ArchitecturePlanOwned(args,{
   if(!calibratedResourceProbe)return sensor;
   const calibrated=await calibratedResourceProbe({sensor,service,phase,model:MODEL,
    headSha:service.headSha,...(studio?{architectureRequestSha256:expectedRequest,
-    wireBody:studioWireBody,mode:'new'}: {})});
+    wireBody:studioWireBody,mode:studioRequest.mode,
+    ...(revision?{basePlanSha256:studioRequest.basePlanSha256,sourceDiagnosisSha256:studioRequest.sourceDiagnosisSha256}:{})}: {})});
   if(!calibratedClearance(calibrated,service,now(),expectedRequest))return sensor;
   return calibrated;
  };
@@ -826,13 +856,19 @@ export async function runR125ArchitecturePlanOwned(args,{
      await exactRequestApprovalVerifier({requestSha256,model:MODEL,
        headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0,
        purpose:'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir,
-        mode:'new',wireBody:studioWireBody,modelDigest:MODEL_DIGEST}:{}),contextLength:CONTEXT_LENGTH,
+        mode:studioRequest.mode,wireBody:studioWireBody,modelDigest:MODEL_DIGEST,
+        ...(revision?{basePlanSha256:studioRequest.basePlanSha256,sourceDiagnosisSha256:studioRequest.sourceDiagnosisSha256}:{})}:{}),contextLength:CONTEXT_LENGTH,
        maxOutputTokens:MAX_OUTPUT_TOKENS,
        calibrationProofSha256:pre.calibrationProofSha256})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
    throw Error('EXACT_ARCHPLAN_REQUEST_APPROVAL_REQUIRED');
   }
   if(studio){
+   if(revision){
+    const latest=readR125RevisionInputs({revisionPlanPath:args.revisionPlanPath,revisionDiagnosisPath:args.revisionDiagnosisPath??null});
+    if(latest.revisionBaseSha256!==studioRequest.basePlanSha256||latest.revisionDiagnosisSha256!==studioRequest.sourceDiagnosisSha256)
+     throw Error('STUDIO_REVISION_INPUT_CHANGED');
+   }
    if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
    if(init.signal?.aborted)throw Error('MODEL_REQUEST_ABORTED');
    if(!calibratedClearance(previous,service,now(),expectedRequest))throw Error('PRE_POST_CLEARANCE_EXPIRED');
@@ -898,6 +934,9 @@ export async function runR125ArchitecturePlanOwned(args,{
   result=run?.report??run;
   if(studio&&(!run?.report||path.resolve(run.outputDirectory??'')!==path.resolve(args.outDir)))
    result=hold('OWNED_RUNNER_OUTPUT_DIRECTORY_MISMATCH');
+  if(revision&&(result?.revisionBasePlanSha256!==studioRequest.basePlanSha256||
+      result?.revisionDiagnosisSha256!==studioRequest.sourceDiagnosisSha256))
+   result=hold('OWNED_REVISION_PROVENANCE_MISMATCH');
  }catch(error){
   result=hold('ARCHITECTURE_PLAN_RUN_FAILED',{reasonDetail:String(error?.message??error).slice(0,160)});
  }

@@ -235,6 +235,44 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
   sourceIssueCodes:[diagnosis.status,...(authoredFixtureError?[issue]:[])],
   missingRequiredFixtureRoles};
 }
+/** Read and validate the same immutable revision input for offline preparation
+ * and the actual R125 runner. A successful base has no HOLD diagnosis. */
+export function readR125RevisionInputs({revisionPlanPath=null,revisionDiagnosisPath=null}={}){
+ if(revisionPlanPath!==null&&(typeof revisionPlanPath!=='string'||!revisionPlanPath.trim()))
+  fail('INVALID_REVISION_PLAN_OPTION');
+ if(revisionDiagnosisPath!==null&&(typeof revisionDiagnosisPath!=='string'||
+  !revisionDiagnosisPath.trim()||revisionPlanPath===null))
+  fail('INVALID_REVISION_DIAGNOSIS_OPTION');
+ let revisionBase=null,revisionBaseJson=null,revisionBaseSha256=null;
+ let revisionDiagnosis=null,revisionDiagnosisJson=null,revisionDiagnosisSha256=null;
+ if(revisionPlanPath!==null){
+  try{
+   revisionBaseJson=fs.readFileSync(revisionPlanPath,'utf8');
+   revisionBase=JSON.parse(revisionBaseJson);
+   validateArchitecturePlan(revisionBase);
+  }catch(error){fail('INVALID_REVISION_BASE_PLAN_'+String(error?.message??error).slice(0,100));}
+  revisionBaseSha256=sha(JSON.stringify(revisionBase));
+ }
+ if(revisionDiagnosisPath!==null){
+  try{
+   revisionDiagnosisJson=fs.readFileSync(revisionDiagnosisPath,'utf8');
+   if(revisionDiagnosisJson.length>60000)fail('INVALID_REVISION_SOURCE_DIAGNOSIS_SIZE');
+   const full=JSON.parse(revisionDiagnosisJson);
+   revisionDiagnosis={status:full.status,sourceVerified:full.sourceVerified,
+    compilerReason:full.compilerReason,
+    ...(full.spatialFootprint?{spatialFootprint:full.spatialFootprint}:{})};
+   if(!validR125RevisionDiagnosis(revisionDiagnosis))
+    fail('INVALID_REVISION_SOURCE_DIAGNOSIS');
+   revisionDiagnosisSha256=sha(revisionDiagnosisJson);
+  }catch(error){
+   if(String(error?.message??error).includes('INVALID_REVISION_SOURCE_DIAGNOSIS'))throw error;
+   fail('INVALID_REVISION_SOURCE_DIAGNOSIS_'+String(error?.message??error).slice(0,100));
+  }
+ }
+ return {revisionBase,revisionBaseJson,revisionBaseSha256,
+  revisionDiagnosis,revisionDiagnosisJson,revisionDiagnosisSha256};
+}
+
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
 reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false,
@@ -263,32 +301,9 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
   fail('OWNED_WINDOWS_ONE_SHOT_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
- let revisionBase=null,revisionBaseJson=null,revisionBaseSha256=null;
- let revisionDiagnosis=null,revisionDiagnosisJson=null,revisionDiagnosisSha256=null;
- if(revisionPlanPath!==null){
-  try{
-   revisionBaseJson=fs.readFileSync(revisionPlanPath,'utf8');
-   revisionBase=JSON.parse(revisionBaseJson);
-   validateArchitecturePlan(revisionBase);
-  }catch(error){fail('INVALID_REVISION_BASE_PLAN_'+String(error?.message??error).slice(0,100));}
-  revisionBaseSha256=sha(JSON.stringify(revisionBase));
- }
- if(revisionDiagnosisPath!==null){
-  try{
-   revisionDiagnosisJson=fs.readFileSync(revisionDiagnosisPath,'utf8');
-   if(revisionDiagnosisJson.length>60000)fail('INVALID_REVISION_SOURCE_DIAGNOSIS_SIZE');
-   const full=JSON.parse(revisionDiagnosisJson);
-   revisionDiagnosis={status:full.status,sourceVerified:full.sourceVerified,
-    compilerReason:full.compilerReason,
-    ...(full.spatialFootprint?{spatialFootprint:full.spatialFootprint}:{})};
-   if(!validR125RevisionDiagnosis(revisionDiagnosis))
-    fail('INVALID_REVISION_SOURCE_DIAGNOSIS');
-   revisionDiagnosisSha256=sha(revisionDiagnosisJson);
-  }catch(error){
-   if(String(error?.message??error).includes('INVALID_REVISION_SOURCE_DIAGNOSIS'))throw error;
-   fail('INVALID_REVISION_SOURCE_DIAGNOSIS_'+String(error?.message??error).slice(0,100));
-  }
- }
+ const {revisionBase,revisionBaseJson,revisionBaseSha256,
+  revisionDiagnosis,revisionDiagnosisJson,revisionDiagnosisSha256}=
+  readR125RevisionInputs({revisionPlanPath,revisionDiagnosisPath});
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null,actualRequestSha256=null,preparedTransportAttempts=0;
  const transport=trialMode?fetchR125LongLocalCompletion:fetcher;
  const selectedTransport=materialsTrial?createR125MaterialsTrialTransport(transport,body=>{

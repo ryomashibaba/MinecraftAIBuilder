@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {prepareR125StudioNewRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
+import {prepareR125StudioNewRequest,prepareR125StudioRevisionRequest,summarizeR125StudioRun,runR125ArchitecturePlanOwned,runR125ResourceCalibrationOwned} from './r125-local-architecture-plan-owned.mjs';
 const input={model:'qwen3:14b',prompt:'自然光が入る小さな交流施設を作ってください。',headSha:'a'.repeat(40)};
 test('arbitrary brief prepares the real owned adapter without network and changes request hash',async()=>{
  let wire;
@@ -38,11 +38,14 @@ test('Studio never imports a mere SOURCE report or unsettled process',async()=>{
 
 /** Real adapter + runner + B143 compiler; only HTTP and resource/lease
  * providers are injected. No model, network, world or Windows process. */
-for(const startupTimeout of [false,true])test('Studio owned path produces a real SOURCE receipt (startup timeout='+startupTimeout+')', {timeout:15000}, async()=>{
+for(const [startupTimeout,revision] of [[false,false],[true,false],[false,true]])test('Studio owned path produces a SOURCE receipt with injected HTTP (startup timeout='+startupTimeout+', revision='+revision+')', {timeout:15000}, async()=>{
  const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
- const request=await prepareR125StudioNewRequest({...input,prompt});
  const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-studio-owned-')),outDir=path.join(root,'run');
+ const revisionPlanPath=path.join(root,'base.json');
+ if(revision)fs.writeFileSync(revisionPlanPath,original);
+ const revisionArgs=revision?{revisionPlanPath}:{};
+ const request=await (revision?prepareR125StudioRevisionRequest:prepareR125StudioNewRequest)({...input,prompt,...revisionArgs});
  const digest='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8';
  const hash=x=>createHash('sha256').update(x).digest('hex');
  let seq=0,posts=0,approval=0,stops=0,tagsCalls=0,loaded=false,loadedObservedResolve;
@@ -60,8 +63,9 @@ for(const startupTimeout of [false,true])test('Studio owned path produces a real
   },
   async stop(){stops++;return {ownerStopConfirmed:true,monitorStopConfirmed:true}}
  };
- const probe=async({sensor,architectureRequestSha256,wireBody,mode})=>{
-  assert.equal(hash(wireBody),request.requestSha256);assert.equal(mode,'new');
+ const probe=async({sensor,architectureRequestSha256,wireBody,mode,basePlanSha256})=>{
+  assert.equal(hash(wireBody),request.requestSha256);assert.equal(mode,request.mode);
+  if(revision)assert.equal(basePlanSha256,request.basePlanSha256);
   return {...sensor,status:'SAFE_FOR_ONE_REQUEST',
   resourceSafetyCertified:true,inferenceMemoryPeakCalibrated:true,model:input.model,modelDigest:digest,
   contextLength:16384,maxOutputTokens:4096,calibrationProofSha256:'f'.repeat(64),
@@ -93,10 +97,10 @@ for(const startupTimeout of [false,true])test('Studio owned path produces a real
   return {ok:true,json:async()=>({models:[]})};
  };
  try{
-  const result=await runR125ArchitecturePlanOwned({model:input.model,prompt,outDir},{
+  const result=await runR125ArchitecturePlanOwned({model:input.model,prompt,outDir,...revisionArgs},{
    controller,studioRequest:request,projectLease:{assertHeld:async()=>true},
    calibratedResourceProbe:probe,exactRequestApprovalVerifier:async x=>{
-    approval++;return hash(x.wireBody)===request.requestSha256&&x.mode==='new'&&x.modelDigest===digest&&
+    approval++;return hash(x.wireBody)===request.requestSha256&&x.mode===request.mode&&(!revision||x.basePlanSha256===request.basePlanSha256)&&x.modelDigest===digest&&
      x.requestSha256===request.requestSha256&&x.headSha===request.headSha&&
      x.briefSha256===request.briefSha256&&x.outDir===outDir;
    },fetcher});
@@ -106,6 +110,11 @@ for(const startupTimeout of [false,true])test('Studio owned path produces a real
   const saved=JSON.parse(fs.readFileSync(path.join(outDir,'RUN_REPORT.json'),'utf8'));
   const receipt=summarizeR125StudioRun(request,result,outDir,true);
   assert.equal(receipt.status,'SOURCE_READY_REVIEW_ONLY');
+  if(revision){
+   assert.equal(receipt.mode,'revision');assert.equal(receipt.basePlanSha256,request.basePlanSha256);
+   assert.equal(fs.readFileSync(revisionPlanPath,'utf8'),original);
+   assert.equal(summarizeR125StudioRun(request,{...result,revisionBasePlanSha256:'0'.repeat(64)},outDir,true).status,'HOLD');
+  }
   assert.equal(receipt.sourceSha256,saved.sourceSha256);assert.equal(receipt.geometrySha256,saved.geometrySha256);
   assert.equal(fs.readFileSync(path.join(outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
   assert.ok(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')));
