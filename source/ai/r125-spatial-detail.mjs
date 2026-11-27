@@ -23,6 +23,18 @@ export function packR125AdjacentBoxes(elements){
  }
  return out;
 }
+/** Choose coordinates for the full author-selected court BEFORE emitting
+ * geometry. Keep the original entrance room, access, and court dimensions.
+ * Do not change historical valid placements or choose a different room. */
+export function fitR125AuthoredCourtEntryX(x,front,zones,spaces){
+ const z=zones.find(v=>v.range.z[0]===front+1&&
+  x>=v.range.x[0]&&x+1<=v.range.x[1]);
+ if(!z||!spaces.some(s=>s.id===z.id&&['public','shared'].includes(s.access)))return null;
+ const min=z.range.x[0]+2,max=z.range.x[1]-3;
+ if(min>max||front+5>z.range.z[1])return null;
+ const to=Math.max(min,Math.min(max,x));
+ return {zoneId:z.id,from:x,to,policy:'same-room-full-authored-court',authorPlanEdited:false};
+}
 export function detailR125Envelope(elements,plan,program,
  {requireAuthoredCourt=false}={}){
  const entry=elements.find(e=>e.id==='exterior-entrance');

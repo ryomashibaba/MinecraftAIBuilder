@@ -14,7 +14,7 @@ import {SCHEMA as SPATIAL_SCHEMA,compileSpatialComposition} from './r125-spatial
 import {auditR125TableGroups,addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight,addR125SpatialDaylightBays} from './r125-room-daylight.mjs';
 import {expandR125RoomScale} from './r125-room-scale.mjs';
-import {detailR125Envelope} from './r125-spatial-detail.mjs';
+import {detailR125Envelope,fitR125AuthoredCourtEntryX} from './r125-spatial-detail.mjs';
 import {addR125HipRoof} from './r125-hip-roof.mjs';
 import {addR125AuthoredObservation} from './r125-room-observation.mjs';
 import {validateR125BlockPalette} from './r125-block-expression.mjs';
@@ -1122,6 +1122,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
   rearCornerCut,frontCornerCut,rearCourt}=original.expression;
  const {floor,wall,roof}=original.materials,elements=[],program=[];
+ let authoredCourtPlacement=null;
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
  const envelope=l=>({
@@ -1206,9 +1207,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     box(tag+'-third-direct-door','cut',null,
      three.thirdDirectAt(y),three.thirdDirectSize);
   }
+  let entryX=groundEntryX(axis,split,w,entrancePlacement,original.entryZone);
+  if(l===0&&count===1&&axis==='x'&&entrancePlacement==='source-accessible'&&
+     original.entry?.shelterDepth===3){
+   const fit=fitR125AuthoredCourtEntryX(entryX,z0,roomZones,level.spaces);
+   if(fit&&fit.to!==entryX){authoredCourtPlacement=fit;entryX=fit.to;}
+  }
   if(l===0&&facadeLanguage!=='recessed-portico')
-   box('exterior-entrance','cut',null,
-    [groundEntryX(axis,split,w,entrancePlacement,original.entryZone),y,z0],[2,3,1]);
+   box('exterior-entrance','cut',null,[entryX,y,z0],[2,3,1]);
   // A setback makes a real second-floor terrace. It must not be separated
   // from the interior by an uninterrupted exterior wall. Cut a 2-wide door
   // at upper-floor standing height without changing the 1st-floor envelope.
@@ -1246,8 +1252,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   ];
   for(const [name,at,size] of windows){
    // HOST windows must not fill an AI-selected first-zone entry opening.
-   const entryX=groundEntryX(axis,split,w,entrancePlacement,original.entryZone);
-   if(l===0&&original.entryZone==='first'&&name==='front'&&
+   if(l===0&&(original.entryZone==='first'||authoredCourtPlacement)&&name==='front'&&
     entryX<=at[0]+size[0]-1&&entryX+1>=at[0])continue;
    box(tag+'-window-'+name+'-cut','cut',null,at,size);
    box(tag+'-window-'+name+'-glass','add','glass',at,size);
@@ -1748,6 +1753,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  const spatialDetail=hostDetail==='spatial-v1'||authoredEntryCourt?
   detailR125Envelope(elements,original,program,{
    requireAuthoredCourt:authoredEntryCourt}):null;
+ if(authoredCourtPlacement&&spatialDetail)spatialDetail.entryPlacement=authoredCourtPlacement;
  // Leave old successful B143 SOURCE byte-for-byte unchanged. Only a new
  // author response whose requested equipment/daylight would exceed B143's
  // fixed 160-element budget gets a lossless roof-strip representation.
