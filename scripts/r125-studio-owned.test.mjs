@@ -19,9 +19,9 @@ test('request mismatch and missing existing cross-project lease are pre-POST HOL
  assert.equal(posts,0);assert.equal(stopped,2);
 });
 test('Studio never imports a mere SOURCE report or unsettled process',async()=>{
- const req=await prepareR125StudioNewRequest(input),r={model:req.model,requestSha256:req.briefSha256,sourceVerified:true,sourceSha256:'c'.repeat(64),geometrySha256:'d'.repeat(64),modelPostCount:1,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true};
+ const req=await prepareR125StudioNewRequest(input),r={model:req.model,requestSha256:req.briefSha256,sourceVerified:true,sourceSha256:'c'.repeat(64),geometrySha256:'d'.repeat(64),modelPostCount:1,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true};
  assert.equal(summarizeR125StudioRun(req,r,'private/run',true).status,'SOURCE_READY_REVIEW_ONLY');
- for(const bad of [{unloadConfirmed:false},{monitorStopConfirmed:false},{requestSha256:'e'.repeat(64)},{modelPostCount:0}]){
+ for(const bad of [{unloadConfirmed:false},{monitorStopConfirmed:false},{loadedModelObserved:false},{requestSha256:'e'.repeat(64)},{modelPostCount:0}]){
   const receipt=summarizeR125StudioRun(req,{...r,...bad},'private/run',true);
   assert.equal(receipt.status,'HOLD');assert.equal(receipt.runPath,null);
  }

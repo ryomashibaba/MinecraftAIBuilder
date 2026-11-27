@@ -643,7 +643,8 @@ export async function prepareR125StudioNewRequest({model,prompt,headSha}={}){
  * A runner SOURCE report alone must not trigger Studio import. */
 export function summarizeR125StudioRun(request,result,runPath,lockReleased){
  const settled=result?.modelPostCount===1&&result.unloadConfirmed===true&&
-  result.ownedServiceStopConfirmed===true&&result.monitorStopConfirmed===true&&lockReleased===true;
+  result.ownedServiceStopConfirmed===true&&result.monitorStopConfirmed===true&&
+  result.loadedModelObserved===true&&lockReleased===true;
  const ready=settled&&result.sourceVerified===true&&
   result.requestSha256===request.briefSha256&&result.model===request.model&&
   SHA256_RE.test(result.sourceSha256??'')&&SHA256_RE.test(result.geometrySha256??'');
@@ -655,6 +656,7 @@ export function summarizeR125StudioRun(request,result,runPath,lockReleased){
   runPath:ready?runPath:null,sourceVerified:ready,
   sourceSha256:ready?result.sourceSha256:null,geometrySha256:ready?result.geometrySha256:null,
   modelPostCount:result?.modelPostCount??0,automaticRetries:0,
+  loadedModelObserved:result?.loadedModelObserved===true,
   unloadConfirmed:result?.unloadConfirmed===true,ownedServiceStopConfirmed:result?.ownedServiceStopConfirmed===true,
   monitorStopConfirmed:result?.monitorStopConfirmed===true,projectLockReleased:lockReleased===true,
   artStatus:'NOT_REVIEWED',worldContacts:0,worldWrites:0,constructionApproved:false,
@@ -805,8 +807,12 @@ export async function runR125ArchitecturePlanOwned(args,{
  };
  let result;
  try{
-  result=await runner({...args,model:MODEL,endpoint:'http://127.0.0.1:11435/v1/chat/completions',
+  const run=await runner({...args,model:MODEL,endpoint:'http://127.0.0.1:11435/v1/chat/completions',
    repairOnce:false},{fetcher:monitoredFetch,timeoutMs});
+  // The existing runner returns {report, outputDirectory}, not report itself.
+  result=run?.report??run;
+  if(studio&&(!run?.report||path.resolve(run.outputDirectory??'')!==path.resolve(args.outDir)))
+   result=hold('OWNED_RUNNER_OUTPUT_DIRECTORY_MISMATCH');
  }catch(error){
   result=hold('ARCHITECTURE_PLAN_RUN_FAILED',{reasonDetail:String(error?.message??error).slice(0,160)});
  }
@@ -832,7 +838,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  }
  if(studio){
   if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null});
-  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true};
+  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true};
  }
  try{
   const raw=fs.readFileSync(path.join(args.outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
@@ -908,9 +914,25 @@ async function runOwnedCli(argv){
    if(controller)try{await controller.stop('STUDIO_RUN_EXCEPTION');}catch{}
    result=hold(String(error?.message??'STUDIO_RUN_EXCEPTION').slice(0,160));
   }finally{
-   if(lease&&typeof lease.release==='function')try{released=await lease.release()===true;}catch{}
-   releaseLocal();
+   const localReleased=releaseLocal()===true;
+   // The existing external operator must verify safe release. It must not
+   // release a live shared slot on an unconfirmed stop; it may return false.
+   if(lease&&typeof lease.release==='function')try{
+    released=await lease.release({modelPostCount:result.modelPostCount,
+     unloadConfirmed:result.unloadConfirmed===true,
+     ownedServiceStopConfirmed:result.ownedServiceStopConfirmed===true,
+     monitorStopConfirmed:result.monitorStopConfirmed===true})===true&&localReleased;
+   }catch{}
   }
+  // Confirm the actual completed runner artifact, not a fabricated receipt.
+  if(result.sourceVerified===true)try{
+   const saved=readJson(path.join(args.outDir,'RUN_REPORT.json'),1000000);
+   if(saved.sourceVerified!==true||saved.model!==request.model||saved.requestSha256!==request.briefSha256||
+      saved.sourceSha256!==result.sourceSha256||saved.geometrySha256!==result.geometrySha256||
+      shaText(fs.readFileSync(path.join(args.outDir,'REQUEST_ORIGINAL.txt'),'utf8'))!==request.briefSha256||
+      !fs.statSync(path.join(args.outDir,'B143_SOURCE_REVIEW_ONLY.json')).isFile())
+    throw Error('STUDIO_RUN_ARTIFACT_MISMATCH');
+  }catch{result={...result,sourceVerified:false,reason:'STUDIO_RUN_ARTIFACT_MISMATCH'};}
   const receipt=summarizeR125StudioRun(request,result,args.outDir,released);
   console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
   return;
@@ -980,5 +1002,12 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
    console.log(JSON.stringify(await prepareR125StudioNewRequest({...args,headSha:process.env.MAB_HEAD})));
   }else await runOwnedCli(argv);
  }
- catch{console.error('R125_OWNED_ARCHPLAN_HOLD');process.exitCode=2;}
+ catch(error){
+  if(['--studio-new','--prepare-studio-new'].includes(process.argv[2]))
+   console.log(JSON.stringify({schema:'r125-studio-owned-result-v1',mode:'new',status:'HOLD',
+    reason:String(error?.message??'R125_OWNED_ARCHPLAN_HOLD').slice(0,160),runPath:null,sourceVerified:false,
+    modelPostCount:0,automaticRetries:0,worldContacts:0,worldWrites:0}));
+  else console.error('R125_OWNED_ARCHPLAN_HOLD');
+  process.exitCode=2;
+ }
 }

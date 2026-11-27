@@ -180,8 +180,9 @@ export function acquireLocalTrialLock(){
    return ()=>{
     try{
      const current=JSON.parse(fs.readFileSync(lock,'utf8'));
-     if(current.pid===pid&&current.token===token)fs.unlinkSync(lock);
+     if(current.pid===pid&&current.token===token){fs.unlinkSync(lock);return true;}
     }catch{/* Preserve another process's or unreadable lock. */}
+    return false;
    };
   }catch(error){
    if(error?.code!=='EEXIST')fail('LOCAL_MODEL_TRIAL_LOCK_UNAVAILABLE');
