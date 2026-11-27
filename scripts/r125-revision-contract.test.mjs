@@ -39,4 +39,9 @@ test('actual revision adapter wire uses restricted schema and unchanged previous
  assert.deepEqual(payload.previousArchitecturePlan,prev);
  assert.equal(payload.architecturalRequest,prompt);
  assert.match(payload.observationRelationRule,/^Omit observationLink/);
+ assert.match(sent.messages[0].content,/The requested scope controls the revision/);
+ assert.match(sent.messages[0].content,/preserve all unaffected authored fields exactly/);
+ assert.match(sent.messages[0].content,/Do not add equipment merely to increase the fixture count/);
+ assert.match(sent.messages[0].content,/When a whole-building redesign is requested/);
+ assert.match(payload.modelRevisionRule,/not permission to redesign unrelated parts/);
 });
