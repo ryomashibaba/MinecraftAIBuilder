@@ -371,7 +371,7 @@ const exactLoadedModel=body=>Array.isArray(body?.models)&&body.models.length===1
 export async function runR125ResourceCalibrationOwned({
  calibrationRequest,calibrationRequestSha256,minimumInputTokens=4777,
  evidenceWriter=null
-},{controller,fetcher=fetch,approvalVerifier=null,now=()=>Date.now(),
+},{controller,fetcher=fetch,approvalVerifier=null,projectLease=null,now=()=>Date.now(),
  timeoutMs=180000,pollMs=300}={}){
  const service=controller;
  const report={schema:'r125-qwen14b-owned-resource-calibration-v1',status:'HOLD',
@@ -412,6 +412,12 @@ export async function runR125ResourceCalibrationOwned({
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>180000||
     !Number.isSafeInteger(pollMs)||pollMs<250||pollMs>5000)
   return fail('CALIBRATION_TIMEOUT_OR_POLL_BOUNDS_INVALID');
+ const leaseHeld=async()=>{
+  if(projectLease===null)return true; // injected/legacy function callers; CLI requires a lease
+  try{return typeof projectLease.assertHeld==='function'&&await projectLease.assertHeld()===true;}
+  catch{return false;}
+ };
+ if(!await leaseHeld())return fail('PROJECT_LEASE_LOST');
  const request=validateCalibrationRequest({body:calibrationRequest,
   expectedSha256:calibrationRequestSha256});
  if(!request.valid)return fail(request.reason);
@@ -438,6 +444,7 @@ export async function runR125ResourceCalibrationOwned({
  const sample=async(phase,{waitForNewSequence=false}={})=>{
   const sequenceDeadline=waitForNewSequence?Date.now()+3000:0;
   for(;;){
+   if(!await leaseHeld())throw Error('PROJECT_LEASE_LOST');
    const s=await service.checkResourceSafety({phase,model:MODEL,
     headSha:service.headSha,waitForNewSequence});
    if(s?.reason==='MONITOR_SEQUENCE_NOT_ADVANCED'&&waitForNewSequence){
@@ -490,6 +497,11 @@ export async function runR125ResourceCalibrationOwned({
   maxOutputTokens:MAX_OUTPUT_TOKENS})===true;}catch{}
  if(!approved)
   return fail('INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED');
+ if(projectLease!==null){
+  try{await sample('PRE_POST',{waitForNewSequence:true});}
+  catch(error){return fail(error?.message??'PRE_POST_MONITOR_SAMPLE_HOLD');}
+  if(!await leaseHeld())return fail('PROJECT_LEASE_LOST');
+ }
 
  const abort=new AbortController(),started=now(),deadline=started+timeoutMs;
  report.calibrationStartedAtEpochMs=started;
@@ -563,7 +575,7 @@ export async function runR125ResourceCalibrationOwned({
    }else throw Error('LOADED_MODEL_IDENTITY_OR_CONTEXT_MISMATCH');
   }catch(error){monitorError=String(error?.message??error);break;}
  }
- if(!requestDone){
+ if(monitorError||!requestDone){
   monitorError=monitorError??(now()>=deadline?'CALIBRATION_TIMEOUT':'CALIBRATION_ABORTED');
   abort.abort();await stop(monitorError);
   await Promise.race([pending,delay(5000)]);
@@ -572,6 +584,7 @@ export async function runR125ResourceCalibrationOwned({
   return report;
  }
  const final=await pending;
+ if(!await leaseHeld())return fail('PROJECT_LEASE_LOST');
  if(!final.ok)return fail(final.error);
  const choice=Array.isArray(final.value?.choices)&&final.value.choices.length===1?
   final.value.choices[0]:null;
@@ -622,7 +635,7 @@ const OWNED_ENDPOINT='http://127.0.0.1:11435/v1/chat/completions';
 const shaText=text=>createHash('sha256').update(text).digest('hex');
 /** Offline preparation uses the SAME adapter and settings as owned execution.
  * The injected transport only captures bytes and refuses, never calls HTTP. */
-export async function prepareR125StudioNewRequest({model,prompt,headSha}={}){
+export async function prepareR125StudioNewRequest({model,prompt,headSha}={}, {onWireBody=null}={}){
  if(model!==MODEL||typeof prompt!=='string'||prompt.length<8||prompt.length>8000||
     !HEAD_RE.test(headSha??''))throw Error('STUDIO_NEW_REQUEST_INVALID');
  let exact=null;
@@ -635,6 +648,9 @@ export async function prepareR125StudioNewRequest({model,prompt,headSha}={}){
   }});
  try{await author({prompt});throw Error('STUDIO_PREPARE_UNEXPECTED_SUCCESS');}
  catch(error){if(exact===null||!String(error?.message).includes('LOCAL_HTTP_418'))throw error;}
+ // Only the in-process PRIVATE verifier needs the exact payload to determine
+ // calibrated input scope. Never expose it in CLI stdout or the public receipt.
+ if(onWireBody!==null)await onWireBody(exact);
  return {schema:'r125-studio-new-request-v1',mode:'new',headSha,model,
   briefSha256:shaText(prompt),requestSha256:shaText(exact),endpoint:OWNED_ENDPOINT,
   maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
@@ -677,10 +693,12 @@ export async function runR125ArchitecturePlanOwned(args,{
  const service=controller;
  const studio=studioRequest!==null;
  const expectedRequest=studio?studioRequest.requestSha256:ARCHPLAN_REQUEST_SHA256;
+ let studioWireBody=null;
  if(studio){
   let valid=false;
   try{
-   const prepared=await prepareR125StudioNewRequest({model:args.model,prompt:args.prompt,headSha:service.headSha});
+   const prepared=await prepareR125StudioNewRequest({model:args.model,prompt:args.prompt,headSha:service.headSha},
+    {onWireBody:body=>{studioWireBody=body;}});
    valid=JSON.stringify(prepared)===JSON.stringify(studioRequest)&&
     Object.keys(args).every(k=>['model','prompt','outDir'].includes(k))&&
     typeof projectLease?.assertHeld==='function'&&await projectLease.assertHeld()===true;
@@ -698,7 +716,8 @@ export async function runR125ArchitecturePlanOwned(args,{
   if(studio&&!ownedSamplePass(sensor,service,phase,now()))return hold('RESOURCE_OR_HEARTBEAT_HOLD');
   if(!calibratedResourceProbe)return sensor;
   const calibrated=await calibratedResourceProbe({sensor,service,phase,model:MODEL,
-   headSha:service.headSha,...(studio?{architectureRequestSha256:expectedRequest}: {})});
+   headSha:service.headSha,...(studio?{architectureRequestSha256:expectedRequest,
+    wireBody:studioWireBody,mode:'new'}: {})});
   if(!calibratedClearance(calibrated,service,now(),expectedRequest))return sensor;
   return calibrated;
  };
@@ -755,7 +774,8 @@ export async function runR125ArchitecturePlanOwned(args,{
       outgoing?.model!==MODEL||outgoing?.max_tokens!==MAX_OUTPUT_TOKENS||
      await exactRequestApprovalVerifier({requestSha256,model:MODEL,
        headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0,
-       purpose:'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir}:{}),contextLength:CONTEXT_LENGTH,
+       purpose:'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir,
+        mode:'new',wireBody:studioWireBody,modelDigest:MODEL_DIGEST}:{}),contextLength:CONTEXT_LENGTH,
        maxOutputTokens:MAX_OUTPUT_TOKENS,
        calibrationProofSha256:pre.calibrationProofSha256})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
@@ -995,21 +1015,57 @@ async function runOwnedCalibrationCli(argv){
     typeof bindings.verifyCalibrationRequestApproval!=='function'||
     typeof bindings.saveCalibrationEvidence!=='function')
   throw Error('PRIVATE_CALIBRATION_BINDING_INCOMPLETE');
- const controller=await createWindowsOwnedOllamaController({
-  pythonExe,ollamaExe,expectedHead,repoRoot:ROOT});
- const result=await runR125ResourceCalibrationOwned({
-  calibrationRequest:bindings.calibrationRequest,
-  calibrationRequestSha256:bindings.calibrationRequestSha256,
-  minimumInputTokens:bindings.minimumInputTokens,
-  evidenceWriter:bindings.saveCalibrationEvidence},{controller,
-  approvalVerifier:bindings.verifyCalibrationRequestApproval});
+ if(typeof bindings.acquireProjectModelLock!=='function')
+  throw Error('EXISTING_PROJECT_MODEL_LOCK_BINDING_REQUIRED');
+ const request=validateCalibrationRequest({body:bindings.calibrationRequest,
+  expectedSha256:bindings.calibrationRequestSha256});
+ if(!request.valid)throw Error(request.reason);
+ const lockRequest={schema:'r125-resource-calibration-request-v1',mode:'calibration',
+  headSha:expectedHead,model:MODEL,modelDigest:MODEL_DIGEST,requestSha256:request.requestSha256,
+  endpoint:OWNED_ENDPOINT,maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0};
+ let lease=null,controller=null,released=false;
+ let result=hold('CALIBRATION_NOT_STARTED',{resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false});
+ const releaseLocal=acquireLocalTrialLock();
+ try{
+  lease=await bindings.acquireProjectModelLock(lockRequest);
+  if(typeof lease?.assertHeld!=='function'||typeof lease?.release!=='function'||await lease.assertHeld()!==true)
+   throw Error('PROJECT_MODEL_LOCK_NOT_ACQUIRED');
+  controller=await createWindowsOwnedOllamaController({pythonExe,ollamaExe,expectedHead,repoRoot:ROOT});
+  result=await runR125ResourceCalibrationOwned({
+   calibrationRequest:bindings.calibrationRequest,calibrationRequestSha256:request.requestSha256,
+   minimumInputTokens:bindings.minimumInputTokens},{controller,projectLease:lease,
+   approvalVerifier:bindings.verifyCalibrationRequestApproval});
+ }catch(error){
+  result={...result,status:'HOLD',reason:String(error?.message??'CALIBRATION_EXCEPTION').slice(0,160),
+   resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false};
+  if(controller)try{await controller.stop('CALIBRATION_EXCEPTION');}catch{}
+ }finally{
+  const localReleased=releaseLocal()===true;
+  if(lease&&typeof lease.release==='function')try{
+   released=await lease.release({modelPostCount:result.modelPostCount,
+    unloadConfirmed:result.unloadedConfirmed===true,
+    ownedServiceStopConfirmed:result.ownedServiceStopConfirmed===true,
+    monitorStopConfirmed:result.monitorStopConfirmed===true})===true&&localReleased;
+  }catch{}
+ }
+ result.projectLockReleased=released;
+ if(!released&&result.status==='CALIBRATION_PASS'){
+  result.status='HOLD';result.reason='PROJECT_LOCK_RELEASE_UNCONFIRMED';
+  result.resourceSafetyCertified=false;result.inferenceMemoryPeakCalibrated=false;
+ }
+ // Persist the evidence only after the actual project lease settlement.
+ // A lock/launch failure must not overwrite any previously valid evidence.
+ if(result.calibrationRequestSha256)try{await bindings.saveCalibrationEvidence(result);}catch{
+  result.status='HOLD';result.reason='PRIVATE_EVIDENCE_WRITE_FAILED';
+  result.resourceSafetyCertified=false;result.inferenceMemoryPeakCalibrated=false;
+ }
  console.log(JSON.stringify({schema:result.schema,status:result.status,
   reason:result.reason,calibrationRequestSha256:result.calibrationRequestSha256??
    bindings.calibrationRequestSha256,modelPostCount:result.modelPostCount,
   automaticRetries:result.automaticRetries,contextLength:result.contextLength,
   maxOutputTokens:result.maxOutputTokens,unloadedConfirmed:result.unloadedConfirmed,
   ownedServiceStopConfirmed:result.ownedServiceStopConfirmed,
-  monitorStopConfirmed:result.monitorStopConfirmed,worldWrites:0}));
+  monitorStopConfirmed:result.monitorStopConfirmed,projectLockReleased:released,worldWrites:0}));
  if(result.status!=='CALIBRATION_PASS')process.exitCode=2;
 }
 
