@@ -407,3 +407,34 @@ test('the calibration PASS shape requires observed context, full output cap, and
  assert.equal(approval.maxPosts,1);
  assert.equal(approval.automaticRetries,0);
 });
+
+// Real CLI passes a project lease. Only OWNED_TAGS timeout is eligible for
+// one read-only retry, and only after a new valid resource sample.
+test('owned tags startup timeout permits one guarded GET retry, never a model retry',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ for(const scenario of ['recover','timeout','lost','low-resource']){
+  let tags=0,posts=0,checks=0;
+  const controller=calibrationController(async()=>{
+   const value=sensor(++checks);
+   if(scenario==='low-resource')value.observedResourcesMiB.gpuFree=100;
+   return value;
+  });
+  const lease={assertHeld:async()=>scenario!=='lost'||tags===0};
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+   calibrationRequestSha256:sha},{controller,projectLease:lease,
+   approvalVerifier:async()=>false,fetcher:async(url,init={})=>{
+    if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+    if(url.endsWith('/api/tags')&&(++tags===1||scenario==='timeout')){
+     const error=Error('startup timeout');error.name='TimeoutError';throw error;
+    }
+    return calibrationPreflightFetcher(url,init);
+   }});
+  assert.equal(result.status,'HOLD');assert.equal(result.modelPostCount,0);assert.equal(posts,0);
+  assert.equal(tags,['recover','timeout'].includes(scenario)?2:1);
+  assert.equal(result.reason,({recover:'INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED',
+   timeout:'PREFLIGHT_OWNED_TAGS_TIMEOUT',lost:'PROJECT_LEASE_LOST',
+   'low-resource':'PRE_POST_RESOURCE_FLOOR_HOLD'})[scenario]);
+  assert.equal(result.ownedTagsInitialTimeout,true);
+  assert.equal(result.ownedTagsReadOnlyRetrySucceeded===true,scenario==='recover');
+ }
+});

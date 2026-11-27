@@ -298,10 +298,10 @@ const jsonObject=async(fetcher,url,method='GET',signal=AbortSignal.timeout(5000)
  return response.json();
 };
 
-const preflightJsonObject=async(fetcher,url,endpoint)=>{
+const preflightJsonObject=async(fetcher,url,endpoint,timeoutMs=5000)=>{
  try{
   const response=await fetcher(url,{method:'GET',redirect:'error',
-   signal:AbortSignal.timeout(5000)});
+   signal:AbortSignal.timeout(timeoutMs)});
   if(!response?.ok){
    const status=Number.isInteger(response?.status)&&response.status>=100&&
     response.status<=599?response.status:'UNKNOWN';
@@ -425,21 +425,6 @@ export async function runR125ResourceCalibrationOwned({
     minimumInputTokens>12000)return fail('CALIBRATION_INPUT_SCOPE_INVALID');
  const url='http://127.0.0.1:11435/v1/chat/completions';
  const sharedUrl='http://127.0.0.1:11434/api/ps';
- let tags,ownedPs,sharedPs;
- try{
-  [tags,ownedPs,sharedPs]=await Promise.all([
-   preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/tags','OWNED_TAGS'),
-   preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/ps','OWNED_PS'),
-   preflightJsonObject(fetcher,sharedUrl,'SHARED_PS')]);
- }catch(error){return fail(/^PREFLIGHT_(?:OWNED_TAGS|OWNED_PS|SHARED_PS)_(?:HTTP_(?:[1-5][0-9]{2}|UNKNOWN)|CONNECTION_REFUSED|CONNECTION_RESET|TIMEOUT|INVALID_JSON|COMMUNICATION_ERROR)$/.test(error?.message??'')?
-  error.message:'PREFLIGHT_COMMUNICATION_ERROR');}
- const models=tags?.models?.filter(x=>x?.name===MODEL)??[];
- if(models.length!==1||models[0].digest!==MODEL_DIGEST||
-    models[0].size!==MODEL_SIZE||models[0].details?.quantization_level!=='Q4_K_M'||
-    models[0].details?.parameter_size!=='14.8B'||
-    !Array.isArray(ownedPs?.models)||ownedPs.models.length!==0||
-    !Array.isArray(sharedPs?.models)||sharedPs.models.length!==0)
-  return fail('MODEL_DIGEST_OR_COMPETING_MODEL_HOLD');
  let previousSequence=0;
  const sample=async(phase,{waitForNewSequence=false}={})=>{
   const sequenceDeadline=waitForNewSequence?Date.now()+3000:0;
@@ -476,7 +461,44 @@ export async function runR125ResourceCalibrationOwned({
    return s;
   }
  };
- try{await sample('PRE_POST');}
+ let tags,ownedPs,sharedPs;
+ const tagsUrl='http://127.0.0.1:11435/api/tags';
+ try{
+  if(projectLease===null){
+   // Keep injected/legacy caller behavior unchanged.
+   [tags,ownedPs,sharedPs]=await Promise.all([
+    preflightJsonObject(fetcher,tagsUrl,'OWNED_TAGS'),
+    preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/ps','OWNED_PS'),
+    preflightJsonObject(fetcher,sharedUrl,'SHARED_PS')]);
+  }else{
+   // LISTENING establishes ownership, not readiness. A single bounded
+   // GET-only retry is allowed solely for the observed startup timeout.
+   // No calibration POST, resource floor, identity check or lease is relaxed.
+   try{tags=await preflightJsonObject(fetcher,tagsUrl,'OWNED_TAGS');}
+   catch(error){
+    if(error?.message!=='PREFLIGHT_OWNED_TAGS_TIMEOUT')throw error;
+    report.ownedTagsInitialTimeout=true;
+    try{await sample('PRE_POST',{waitForNewSequence:true});}
+    catch(guard){return fail(guard?.message??'PRE_POST_MONITOR_SAMPLE_HOLD');}
+    if(!await leaseHeld())return fail('PROJECT_LEASE_LOST');
+    tags=await preflightJsonObject(fetcher,tagsUrl,'OWNED_TAGS',10000);
+    report.ownedTagsReadOnlyRetrySucceeded=true;
+   }
+   [ownedPs,sharedPs]=await Promise.all([
+    preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/ps','OWNED_PS'),
+    preflightJsonObject(fetcher,sharedUrl,'SHARED_PS')]);
+  }
+ }catch(error){return fail(/^PREFLIGHT_(?:OWNED_TAGS|OWNED_PS|SHARED_PS)_(?:HTTP_(?:[1-5][0-9]{2}|UNKNOWN)|CONNECTION_REFUSED|CONNECTION_RESET|TIMEOUT|INVALID_JSON|COMMUNICATION_ERROR)$/.test(error?.message??'')?
+  error.message:'PREFLIGHT_COMMUNICATION_ERROR');}
+ const models=tags?.models?.filter(x=>x?.name===MODEL)??[];
+ if(models.length!==1||models[0].digest!==MODEL_DIGEST||
+    models[0].size!==MODEL_SIZE||models[0].details?.quantization_level!=='Q4_K_M'||
+    models[0].details?.parameter_size!=='14.8B'||
+    !Array.isArray(ownedPs?.models)||ownedPs.models.length!==0||
+    !Array.isArray(sharedPs?.models)||sharedPs.models.length!==0)
+  return fail('MODEL_DIGEST_OR_COMPETING_MODEL_HOLD');
+
+ try{await sample('PRE_POST',{waitForNewSequence:previousSequence>0});}
  catch(error){return fail(error?.message==='PRE_POST_RESOURCE_FLOOR_HOLD'?
   'PRE_POST_RESOURCE_FLOOR_HOLD':'PRE_POST_MONITOR_SAMPLE_HOLD');}
  try{ownedPs=await jsonObject(fetcher,'http://127.0.0.1:11435/api/ps');}
