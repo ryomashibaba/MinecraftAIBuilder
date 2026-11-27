@@ -1087,7 +1087,9 @@ async function runOwnedCalibrationCli(argv){
   automaticRetries:result.automaticRetries,contextLength:result.contextLength,
   maxOutputTokens:result.maxOutputTokens,unloadedConfirmed:result.unloadedConfirmed,
   ownedServiceStopConfirmed:result.ownedServiceStopConfirmed,
-  monitorStopConfirmed:result.monitorStopConfirmed,projectLockReleased:released,worldWrites:0}));
+  monitorStopConfirmed:result.monitorStopConfirmed,projectLockReleased:released,
+  ownedTagsInitialTimeout:result.ownedTagsInitialTimeout===true,
+  ownedTagsReadOnlyRetrySucceeded:result.ownedTagsReadOnlyRetrySucceeded===true,worldWrites:0}));
  if(result.status!=='CALIBRATION_PASS')process.exitCode=2;
 }
 
