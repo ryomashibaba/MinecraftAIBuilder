@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {estimateStudioResourceBudget as estimate} from './r125-studio-resource-budget.mjs';
+const hash=s=>createHash('sha256').update(s).digest('hex');
+const digest='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8',runtime='a'.repeat(64);
+const wireBody=JSON.stringify({model:'qwen3:14b',stream:false,max_tokens:4096,temperature:0.55,response_format:{type:'json_schema',json_schema:{schema:{type:'object'}}},messages:[{role:'system',content:'test'},{role:'user',content:'test'}]});
+const requestSha256=hash(wireBody);
+const start={ramFree:14000,commitHeadroom:33000,gpuFree:16003,gpuTotal:16384};
+const history={runtimeSha256:runtime,modelDigest:digest,contextLength:16384,maxOutputTokens:4096,responseFormat:'json_schema',kvCacheType:'f16',flashAttention:false,parallel:1,maxLoadedModels:1,evidenceSha256:'b'.repeat(64),start,minimum:{ramFree:11000,commitHeadroom:22000,gpuFree:3650,gpuTotal:16384},placement:{sizeBytes:12949368339,sizeVramBytes:12949368339}};
+const base={wireBody,requestSha256,runtimeSha256:runtime,tokenObservation:{requestSha256,modelDigest:digest,runtimeSha256:runtime,inputUpperBound:6000},history,current:start};
+test('fit is estimate only, never clearance',()=>{const r=estimate(base);assert.equal(r.status,'ESTIMATE_ONLY');assert.equal(r.executionAllowed,false);assert.equal(r.resourceSafetyCertified,false);assert.equal(r.inferenceMemoryPeakCalibrated,false);assert.equal(r.modelPostCount,0);assert.equal(r.requiredMiB.gpuFree,15937);});
+test('low GPU despite old start floor',()=>{const r=estimate({...base,current:{...start,gpuFree:15000}});assert.equal(r.status,'HOLD');assert.equal(r.deficitMiB.gpuFree,937);});
+test('low RAM and commit',()=>{const r=estimate({...base,current:{...start,ramFree:8000,commitHeadroom:16000}});assert.equal(r.status,'HOLD');assert.ok(r.deficitMiB.ramFree>0&&r.deficitMiB.commitHeadroom>0);});
+test('reject changed body and missing/mismatched token binding',()=>{for(const x of [{wireBody:wireBody+' '},{tokenObservation:null},{tokenObservation:{...base.tokenObservation,requestSha256:'c'.repeat(64)}},{tokenObservation:{...base.tokenObservation,inputUpperBound:12289}}])assert.equal(estimate({...base,...x}).status,'HOLD');});
+test('reject missing history, different runtime, offload and bad samples',()=>{for(const h of [null,{...history,runtimeSha256:'c'.repeat(64)},{...history,placement:{...history.placement,sizeVramBytes:1}},{...history,minimum:{...history.minimum,gpuFree:17000}},{...history,flashAttention:true}])assert.equal(estimate({...base,history:h}).status,'HOLD');});
+test('invalid capacity and settings fail closed',()=>{assert.equal(estimate({...base,current:{...start,gpuTotal:0}}).status,'HOLD');const body=JSON.stringify({...JSON.parse(wireBody),max_tokens:8192});assert.equal(estimate({...base,wireBody:body,requestSha256:hash(body)}).status,'HOLD');});
