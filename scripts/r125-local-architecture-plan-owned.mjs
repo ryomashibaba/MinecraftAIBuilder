@@ -370,13 +370,22 @@ async function classifyCalibrationHttpFailure(response){
  finally{clearTimeout(timer);if(reader)try{void reader.cancel().catch(()=>{});}catch{}}
 }
 
+// Synthetic stress response, not a building or a SOURCE candidate. Keep
+// the same input/output/context envelope while using the structured-output
+// protocol of the previously successful author path.
+export function r125CalibrationResponseFormat(){
+ return {type:'json_schema',json_schema:{name:'r125_resource_calibration_v2',strict:true,
+  schema:{type:'object',properties:{payload:{type:'string'}},required:['payload'],
+   additionalProperties:false}}};
+}
 export function validateCalibrationRequest({body,expectedSha256}={}){
  let raw;
  try{raw=JSON.stringify(body);}catch{return {valid:false,reason:'REQUEST_NOT_JSON'};}
  const requestSha256=createHash('sha256').update(raw).digest('hex');
  const messages=body?.messages;
  const valid=body?.model===MODEL&&body?.stream===false&&
-  body?.temperature===0.55&&body?.response_format?.type==='json_object'&&
+  body?.temperature===0.55&&
+  JSON.stringify(body?.response_format)===JSON.stringify(r125CalibrationResponseFormat())&&
   body?.max_tokens===MAX_OUTPUT_TOKENS&&Array.isArray(messages)&&
   messages.length===2&&messages[0]?.role==='system'&&
   messages[1]?.role==='user'&&
@@ -578,7 +587,7 @@ export async function runR125ResourceCalibrationOwned({
  report.calibrationRequestSha256=request.requestSha256;
  report.minimumInputTokens=minimumInputTokens;
  report.runtimeSettings={ollamaHost:'127.0.0.1:11435',contextLength:CONTEXT_LENGTH,
-  maxOutputTokens:MAX_OUTPUT_TOKENS,temperature:0.55,responseFormat:'json_object',
+  maxOutputTokens:MAX_OUTPUT_TOKENS,temperature:0.55,responseFormat:'json_schema',
   requestEndpoint:url,timeoutMs,automaticRetries:0,
   parallelRequests:service.configuredParallelRequests,
   maxLoadedModels:service.configuredMaxLoadedModels,
@@ -712,7 +721,7 @@ export async function prepareR125StudioNewRequest({model,prompt,headSha}={}, {on
     !HEAD_RE.test(headSha??''))throw Error('STUDIO_NEW_REQUEST_INVALID');
  let exact=null;
  const author=createR125ArchitecturePlanLocalAdapter({model,endpoint:OWNED_ENDPOINT,
-  maxOutputTokens:MAX_OUTPUT_TOKENS,onRawModelResponse:()=>{},
+  maxOutputTokens:MAX_OUTPUT_TOKENS,ownedSchema:true,onRawModelResponse:()=>{},
   fetcher:async(url,init)=>{
    if(exact!==null||url!==OWNED_ENDPOINT||init.method!=='POST'||init.redirect!=='error')
     throw Error('STUDIO_PREPARE_BOUNDARY');
@@ -943,7 +952,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  let result;
  try{
   const run=await runner({...args,model:MODEL,endpoint:'http://127.0.0.1:11435/v1/chat/completions',
-   repairOnce:false},{fetcher:monitoredFetch,timeoutMs});
+   repairOnce:false,...(studio?{ownedSchema:true}:{})},{fetcher:monitoredFetch,timeoutMs});
   // The existing runner returns {report, outputDirectory}, not report itself.
   result=run?.report??run;
   if(studio&&(!run?.report||path.resolve(run.outputDirectory??'')!==path.resolve(args.outDir)))
