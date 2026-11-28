@@ -91,6 +91,20 @@ function removeOwnedTempDir(dir){
 }
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
+// Only the controller's own pre-service cleanup can certify that no model
+// could have loaded. An arbitrary exception must never imply safe release.
+export class OwnedStartupFailure extends Error {
+ constructor(reason,{ownerLaunchAttempted,monitorStopConfirmed}={}){
+  super(reason);
+  this.preServiceSettlement=ownerLaunchAttempted===false&&monitorStopConfirmed===true
+   ?Object.freeze({unloadedConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true})
+   :Object.freeze({});
+ }
+}
+export function ownedStartupSettlement(error){
+ return error instanceof OwnedStartupFailure?error.preServiceSettlement:{};
+}
+
 /** Start only a fresh owned server on 127.0.0.1:11435 and a separate sensor. */
 export async function createWindowsOwnedOllamaController({
  pythonExe,ollamaExe,expectedHead,repoRoot=ROOT,now=()=>Date.now(),
@@ -117,6 +131,7 @@ export async function createWindowsOwnedOllamaController({
   ownedCalibration:true}),{flag:'wx'});
  let monitor=null,owner=null,lines=null,ownerQueue=[],ownerWaiters=[];
   let service=null,stopped=false,sequence=0,ownerStopAck=false,providerDiagnostics=null;
+ let ownerLaunchAttempted=false,monitorSpawnError=false;
  const pushLine=value=>{
   try{
    const message=JSON.parse(value);
@@ -173,7 +188,7 @@ export async function createWindowsOwnedOllamaController({
    }
    monitorStopConfirmed=hasExited(monitor);
   }
-  try{removeOwnedTempDir(dir);}catch{}
+  if(monitorStopConfirmed&&(owner===null||hasExited(owner)))try{removeOwnedTempDir(dir);}catch{}
   return {stopped:true,ownerStopConfirmed:ownerStopAck,monitorStopConfirmed,
    reason,servicePid:service?.servicePid,providerDiagnostics};
  };
@@ -182,28 +197,35 @@ export async function createWindowsOwnedOllamaController({
    '--nonce',nonce,'--max-lifetime-seconds','240'],
    {env:{...process.env,MAB_V31_PROBE_NONCE:nonce},windowsHide:true,
     stdio:'ignore'});
+  monitor.on('error',()=>{monitorSpawnError=true;});
   if(!Number.isSafeInteger(monitor.pid)||monitor.pid<=0)
    throw Error('INDEPENDENT_MONITOR_PID_REQUIRED');
-  fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head,
-   ownedCalibration:true,monitorPid:monitor.pid}),{flag:'w'});
+  // The sensor authenticates against session.json twice on startup. Do not
+  // truncate or replace it until an authenticated heartbeat has arrived.
   let previous=0,ready=false;
   const monitorDeadline=Date.now()+15000;
   while(Date.now()<monitorDeadline&&!ready){
-   if(hasExited(monitor))throw Error('INDEPENDENT_MONITOR_EXITED');
+   if(monitorSpawnError||hasExited(monitor))throw Error('INDEPENDENT_MONITOR_EXITED');
    try{
     const sample=readJson(sampleFile);
+    if(sample?.nonce===nonce&&sample?.pid===monitor.pid&&sample?.state==='FAULT')
+     throw Error('INDEPENDENT_MONITOR_SENSOR_FAULT');
     const checked=verifyOwnedArchitectureSample({session:{nonce,monitorPid:monitor.pid},
      sample,owner:{port:PORT,servicePid:1,supervisorPid:1,killOnCloseJob:true},
      headSha:head,previousSequence:0,now:now()});
     if(checked.independentMonitorActive===true&&sample.seq>previous){previous=sample.seq;
      if(previous>=2)ready=true;}
-   }catch{}
+   }catch(error){if(error?.message==='INDEPENDENT_MONITOR_SENSOR_FAULT')throw error;}
    if(!ready)await delay(150);
   }
   if(!ready)throw Error('INDEPENDENT_MONITOR_HEARTBEAT_UNAVAILABLE');
+  fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head,
+   ownedCalibration:true,monitorPid:monitor.pid}),{flag:'w'});
+  ownerLaunchAttempted=true;
   owner=spawnProcess(pythonExe,[OWNER,'--serve-ollama',ollamaExe,dir,nonce,
    String(monitor.pid)],
    {cwd:ROOT,windowsHide:true,stdio:['pipe','pipe','ignore']});
+  owner.on('error',()=>{/* no verified start; existing bounded handshake fails closed */});
   lines=createInterface({input:owner.stdout,crlfDelay:Infinity});
   lines.on('line',pushLine);
   const first=JSON.parse(await nextLine(15000));
@@ -264,8 +286,10 @@ export async function createWindowsOwnedOllamaController({
    async stop(reason='RUN_FINISHED'){return stop(reason);}
   };
  }catch(error){
-  await stop('START_FAILED');
-  throw error;
+  let settlement=null;
+  try{settlement=await stop('START_FAILED');}catch{}
+  throw new OwnedStartupFailure(String(error?.message??'OWNED_START_FAILED').slice(0,160),{
+   ownerLaunchAttempted,monitorStopConfirmed:settlement?.monitorStopConfirmed===true});
  }
 }
 
@@ -1067,7 +1091,7 @@ async function runOwnedCli(argv){
     calibratedResourceProbe:bindings.calibratedResourceProbe,exactRequestApprovalVerifier:bindings.verifyExactRequestApproval});
   }catch(error){
    if(controller)try{await controller.stop('STUDIO_RUN_EXCEPTION');}catch{}
-   result=hold(String(error?.message??'STUDIO_RUN_EXCEPTION').slice(0,160));
+   result=hold(String(error?.message??'STUDIO_RUN_EXCEPTION').slice(0,160),ownedStartupSettlement(error));
   }finally{
    const localReleased=releaseLocal()===true;
    // The existing external operator must verify safe release. It must not
@@ -1152,7 +1176,7 @@ async function runOwnedCalibrationCli(argv){
    approvalVerifier:bindings.verifyCalibrationRequestApproval});
  }catch(error){
   result={...result,status:'HOLD',reason:String(error?.message??'CALIBRATION_EXCEPTION').slice(0,160),
-   resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false};
+   resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,...ownedStartupSettlement(error)};
   if(controller)try{await controller.stop('CALIBRATION_EXCEPTION');}catch{}
  }finally{
   const localReleased=releaseLocal()===true;
