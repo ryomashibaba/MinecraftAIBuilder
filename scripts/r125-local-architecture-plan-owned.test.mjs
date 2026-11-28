@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {runR125ArchitecturePlanOwned,verifyOwnedArchitectureSample,
- hasExited}
+ hasExited,OwnedStartupFailure,ownedStartupSettlement}
  from './r125-local-architecture-plan-owned.mjs';
 import {runR125ResourceCalibrationOwned,validateCalibrationRequest,r125CalibrationResponseFormat}
  from './r125-local-architecture-plan-owned.mjs';
@@ -495,4 +495,14 @@ test('old generic JSON calibration and altered schema are not approved by the st
   const sha=createHash('sha256').update(JSON.stringify(changed)).digest('hex');
   assert.equal(validateCalibrationRequest({body:changed,expectedSha256:sha}).valid,false);
  }
+});
+
+
+test('pre-service startup failure carries only verified no-launch and stopped-monitor settlement',()=>{
+ const proof=ownedStartupSettlement(new OwnedStartupFailure('INDEPENDENT_MONITOR_HEARTBEAT_UNAVAILABLE',{ownerLaunchAttempted:false,monitorStopConfirmed:true}));
+ assert.deepEqual(proof,{unloadedConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true});
+ for(const options of [{ownerLaunchAttempted:true,monitorStopConfirmed:true},{ownerLaunchAttempted:false,monitorStopConfirmed:false},{}]){
+  assert.deepEqual(ownedStartupSettlement(new OwnedStartupFailure('START_FAILED',options)),{});
+ }
+ assert.deepEqual(ownedStartupSettlement(Object.assign(new Error('START_FAILED'),{preServiceSettlement:proof})),{});
 });
