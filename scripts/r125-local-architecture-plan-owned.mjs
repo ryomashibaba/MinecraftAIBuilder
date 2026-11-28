@@ -953,8 +953,14 @@ export async function runR125ArchitecturePlanOwned(args,{
    if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
    if(init.signal?.aborted)throw Error('MODEL_REQUEST_ABORTED');
    if(bounded){
+    // Approval may take time; recheck both services before the final fresh sample.
+    const [ownedIdle,sharedIdle]=await Promise.all([
+     jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
+     jsonObject(fetcher,'http://127.0.0.1:11434/api/ps')]);
+    if(!Array.isArray(ownedIdle?.models)||ownedIdle.models.length!==0||!Array.isArray(sharedIdle?.models)||sharedIdle.models.length!==0)throw Error('BOUNDED_COMPETING_MODEL_HOLD');
     const fresh=await attest('PRE_POST',{waitForNewSequence:true});
     if(monitorFault||!clearance(fresh)||fresh.monitorSequence<=previous.monitorSequence||await projectLease.assertHeld()!==true||init.signal?.aborted)throw Error('BOUNDED_FINAL_PRE_POST_HOLD');
+    if(!clearance(fresh))throw Error('BOUNDED_FINAL_PRE_POST_EXPIRED');
     previous=fresh;
    }else if(!clearance(previous))throw Error('PRE_POST_CLEARANCE_EXPIRED');
   }
@@ -978,8 +984,8 @@ export async function runR125ArchitecturePlanOwned(args,{
     if(bounded&&!clearance(sample,'DURING_INFERENCE'))throw Error('BOUNDED_RESOURCE_HOLD');
     if(studio){
      const [active,shared]=await Promise.all([
-      jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
-      jsonObject(fetcher,'http://127.0.0.1:11434/api/ps')]);
+      jsonObject(fetcher,'http://127.0.0.1:11435/api/ps','GET',AbortSignal.timeout(bounded?1000:5000)),
+      jsonObject(fetcher,'http://127.0.0.1:11434/api/ps','GET',AbortSignal.timeout(bounded?1000:5000))]);
      if(!Array.isArray(shared?.models)||shared.models.length!==0)throw Error('SHARED_SERVICE_BECAME_BUSY');
      if(exactLoadedModel(active)){
        if(bounded&&!boundedPolicy.placementMatches(active.models[0]))throw Error('BOUNDED_MODEL_PLACEMENT_MISMATCH');
