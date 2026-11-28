@@ -409,9 +409,9 @@ test('the calibration PASS shape requires observed context, full output cap, and
  assert.equal(approval.automaticRetries,0);
 });
 
-// Real CLI passes a project lease. Only OWNED_TAGS timeout is eligible for
+// Real CLI passes a project lease. OWNED_TAGS timeout/reset is eligible for
 // one read-only retry, and only after a new valid resource sample.
-test('owned tags startup timeout permits one guarded GET retry, never a model retry',async()=>{
+for(const kind of ['TIMEOUT','CONNECTION_RESET','CONNECTION_REFUSED'])test('owned tags startup '+kind+' permits only eligible guarded GET retry, never a model retry',async()=>{
  const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
  for(const scenario of ['recover','timeout','lost','low-resource']){
   let tags=0,posts=0,checks=0;
@@ -426,17 +426,21 @@ test('owned tags startup timeout permits one guarded GET retry, never a model re
    approvalVerifier:async()=>false,fetcher:async(url,init={})=>{
     if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
     if(url.endsWith('/api/tags')&&(++tags===1||scenario==='timeout')){
-     const error=Error('startup timeout');error.name='TimeoutError';throw error;
+     const error=Error('startup transport');
+      if(kind==='TIMEOUT')error.name='TimeoutError';
+      else error.cause={code:kind==='CONNECTION_RESET'?'ECONNRESET':'ECONNREFUSED'};
+      throw error;
     }
     return calibrationPreflightFetcher(url,init);
    }});
   assert.equal(result.status,'HOLD');assert.equal(result.modelPostCount,0);assert.equal(posts,0);
-  assert.equal(tags,['recover','timeout'].includes(scenario)?2:1);
-  assert.equal(result.reason,({recover:'INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED',
-   timeout:'PREFLIGHT_OWNED_TAGS_TIMEOUT',lost:'PROJECT_LEASE_LOST',
+  assert.equal(tags,kind!=='CONNECTION_REFUSED'&&['recover','timeout'].includes(scenario)?2:1);
+  assert.equal(result.reason,kind==='CONNECTION_REFUSED'?'PREFLIGHT_OWNED_TAGS_CONNECTION_REFUSED':({recover:'INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED',
+   timeout:'PREFLIGHT_OWNED_TAGS_'+kind,lost:'PROJECT_LEASE_LOST',
    'low-resource':'PRE_POST_RESOURCE_FLOOR_HOLD'})[scenario]);
-  assert.equal(result.ownedTagsInitialTimeout,true);
-  assert.equal(result.ownedTagsReadOnlyRetrySucceeded===true,scenario==='recover');
+  assert.equal(result.ownedTagsInitialTimeout===true,kind==='TIMEOUT');
+   assert.equal(result.ownedTagsInitialFailure??null,kind==='CONNECTION_REFUSED'?null:'PREFLIGHT_OWNED_TAGS_'+kind);
+  assert.equal(result.ownedTagsReadOnlyRetrySucceeded===true,kind!=='CONNECTION_REFUSED'&&scenario==='recover');
  }
 });
 
