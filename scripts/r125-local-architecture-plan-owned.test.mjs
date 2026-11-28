@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {runR125ArchitecturePlanOwned,verifyOwnedArchitectureSample,
  hasExited}
  from './r125-local-architecture-plan-owned.mjs';
-import {runR125ResourceCalibrationOwned,validateCalibrationRequest}
+import {runR125ResourceCalibrationOwned,validateCalibrationRequest,r125CalibrationResponseFormat}
  from './r125-local-architecture-plan-owned.mjs';
 import {createHash} from 'node:crypto';
 import {runR125LocalArchitecturePlan} from './r125-local-architecture-plan-run.mjs';
@@ -63,7 +63,7 @@ test('a fresh independent sensor sample remains HOLD without model peak calibrat
 });
 
 const calibrationBody=()=>({model:'qwen3:14b',stream:false,temperature:0.55,
- response_format:{type:'json_object'},max_tokens:4096,messages:[
+ response_format:r125CalibrationResponseFormat(),max_tokens:4096,messages:[
   {role:'system',content:'R125 RESOURCE CALIBRATION ONLY. Return a long JSON payload.'},
   {role:'user',content:'Calibration input padding with no semantic meaning.'}]});
 const sensor=(sequence,alive=true)=>({status:'HOLD',independentMonitorActive:alive,
@@ -483,5 +483,14 @@ test('calibration keeps only allowlisted owner diagnostic summary',async()=>{
   assert.deepEqual(result.ownedProviderDiagnostics,valid?{classes:['MODEL_RUNNER_EXIT'],chunks:12,complete:true}:undefined);
   assert.equal(JSON.stringify(result).includes('SECRET_PRIVATE_PATH'),false);
   assert.equal(result.unloadedConfirmed,true);
+ }
+});
+
+test('old generic JSON calibration and altered schema are not approved by the structured profile',()=>{
+ const body=calibrationBody();
+ for(const response_format of [{type:'json_object'},{...r125CalibrationResponseFormat(),json_schema:{name:'wrong'}}]){
+  const changed={...body,response_format};
+  const sha=createHash('sha256').update(JSON.stringify(changed)).digest('hex');
+  assert.equal(validateCalibrationRequest({body:changed,expectedSha256:sha}).valid,false);
  }
 });
