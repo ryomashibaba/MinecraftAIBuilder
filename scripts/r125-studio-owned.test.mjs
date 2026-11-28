@@ -38,7 +38,7 @@ test('Studio never imports a mere SOURCE report or unsettled process',async()=>{
 
 /** Real adapter + runner + B143 compiler; only HTTP and resource/lease
  * providers are injected. No model, network, world or Windows process. */
-for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio owned path produces a real SOURCE receipt (startup failure='+startupFailure+')', {timeout:15000}, async()=>{
+for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET','WRONG_FORMAT','WRONG_RUNTIME'])test('Studio owned path produces a real SOURCE receipt (startup failure='+startupFailure+')', {timeout:15000}, async()=>{
  const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
  const request=await prepareR125StudioNewRequest({...input,prompt});
  const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
@@ -66,7 +66,8 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
   return {...sensor,status:'SAFE_FOR_ONE_REQUEST',
   resourceSafetyCertified:true,inferenceMemoryPeakCalibrated:true,model:input.model,modelDigest:digest,
   contextLength:16384,maxOutputTokens:4096,calibrationProofSha256:'f'.repeat(64),
-  calibrationResponseFormat:'json_schema',calibrationOllamaExecutableSha256:controller.ollamaExecutableSha256,
+  calibrationResponseFormat:startupFailure==='WRONG_FORMAT'?'json_object':'json_schema',
+  calibrationOllamaExecutableSha256:startupFailure==='WRONG_RUNTIME'?'e'.repeat(64):controller.ollamaExecutableSha256,
   architectureRequestSha256,headSha:request.headSha,resourceCalibrationId:'injected-test-only',
   measuredAtEpochMs:Date.now(),sharedServiceIdle:true};};
  const fetcher=async(url,init)=>{
@@ -103,6 +104,11 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
      x.requestSha256===request.requestSha256&&x.headSha===request.headSha&&
      x.briefSha256===request.briefSha256&&x.outDir===outDir;
    },fetcher});
+  if(['WRONG_FORMAT','WRONG_RUNTIME'].includes(startupFailure)){
+   assert.equal(result.status,'HOLD');assert.equal(result.modelPostCount,0);
+   assert.equal(posts,0);assert.equal(approval,0);assert.equal(stops,1);
+   assert.equal(fs.existsSync(outDir),false);return;
+  }
   assert.equal(posts,1);assert.equal(approval,1);assert.equal(stops,1);
   assert.equal(tagsCalls,startupFailure?2:1);assert.ok(seq>=(startupFailure?4:3));
   assert.equal(result.sourceVerified,true,JSON.stringify(result));
