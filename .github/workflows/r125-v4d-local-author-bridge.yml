@@ -17,6 +17,10 @@ on:
       - 'scripts/r125-local-architecture-plan-owned.mjs'
       - 'scripts/r125-local-architecture-plan-owned.test.mjs'
       - 'scripts/r125-studio-owned.test.mjs'
+      - 'scripts/r125-studio-resource-budget.mjs'
+      - 'scripts/r125-studio-resource-budget.test.mjs'
+      - 'scripts/r125-studio-bounded-policy.mjs'
+      - 'scripts/r125-studio-bounded.test.mjs'
       - 'scripts/r125-local-architecture-plan-run.mjs'
       - 'scripts/r125-local-architecture-plan-run.test.mjs'
       - 'scripts/r125-v10-owned-monitor-link.test.py'
@@ -153,6 +157,8 @@ jobs:
           node --test scripts/r125-v7-private-once.test.mjs
           node --test scripts/r125-local-architecture-plan-owned.test.mjs
           node --test scripts/r125-studio-owned.test.mjs
+          node --test scripts/r125-studio-resource-budget.test.mjs
+          node --test scripts/r125-studio-bounded.test.mjs
           node --test scripts/r125-local-architecture-plan-run.test.mjs
           node --test scripts/r125-v4d-local-architect.test.mjs
           node --test scripts/r125-v4d-replay-private.test.mjs
