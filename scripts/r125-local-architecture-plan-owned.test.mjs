@@ -406,6 +406,8 @@ test('the calibration PASS shape requires observed context, full output cap, and
  assert.equal(approval.contextLength,16384);
  assert.equal(approval.maxOutputTokens,4096);
  assert.equal(approval.maxPosts,1);
+ assert.equal(approval.responseFormat,'json_schema');
+ assert.equal(approval.ollamaExecutableSha256,controller.ollamaExecutableSha256);
  assert.equal(approval.automaticRetries,0);
 });
 
