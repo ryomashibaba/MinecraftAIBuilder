@@ -20,6 +20,7 @@ import sys
 import tempfile
 import threading
 import queue
+import re
 import time
 
 OWNED_OLLAMA_CONTEXT_LENGTH = 16384
@@ -138,6 +139,52 @@ def _port_listener_pids(port=11435):
     return parse_listener_pids(result.stdout, port)
 
 
+class OwnedProviderDiagnostics:
+    """Drain only this job's output; retain fixed categories, never raw text."""
+    patterns = (
+        ('MEMORY_ALLOCATION', r'out of memory|not enough memory|failed to allocate|cuda_error_out_of_memory'),
+        ('GPU_RUNTIME', r'(?:cuda|cublas|gpu|vulkan|rocm).*(?:error|failed|unavailable|not found)|(?:error|failed).*\b(?:cuda|cublas|gpu|vulkan|rocm)\b'),
+        ('MODEL_RUNNER_EXIT', r'runner.*(?:terminated|exited|crashed|died|stopped|failed to start)|exit status|process terminated|panic:|fatal error'),
+        ('MODEL_FILE_OR_FORMAT', r'(?:model|manifest|blob|gguf).*(?:not found|no such file|invalid|corrupt|failed to open)'),
+        ('REQUEST_OR_CONTEXT', r'context length.*(?:exceed|invalid|too (?:long|large))|context window.*(?:exceed|invalid)|token limit.*(?:exceed|invalid)|(?:invalid|unsupported).*(?:request|response.format|json schema)'),
+        ('MODEL_LOAD', r'(?:failed to load|error loading|unable to load).*model|model.*(?:failed to load|loading failed)'),
+        ('PROVIDER_TIMEOUT', r'(?:runner|request|inference|context deadline).*(?:timed out|timeout|deadline exceeded)|context deadline exceeded'),
+    )
+
+    def __init__(self):
+        self.found = set()
+        self.chunks = 0
+        self.complete = False
+        self.thread = None
+
+    def consume(self, fd):
+        # Bounded line fragments; keep draining to avoid pipe backpressure.
+        try:
+            with os.fdopen(fd, 'rb') as stream:
+                while True:
+                    raw = stream.readline(4096)
+                    if not raw:
+                        self.complete = True
+                        break
+                    self.chunks = min(self.chunks + 1, 1000000)
+                    line = raw.decode('utf-8', errors='replace')
+                    for name, pattern in self.patterns:
+                        if re.search(pattern, line, re.IGNORECASE):
+                            self.found.add(name)
+        except OSError:
+            pass
+
+    def start(self, fd):
+        self.thread = threading.Thread(target=self.consume, args=(fd,), daemon=True)
+        self.thread.start()
+
+    def summary(self):
+        if self.thread:
+            self.thread.join(timeout=2)
+        return {'classes': sorted(name for name, _ in self.patterns if name in self.found),
+                'chunks': self.chunks, 'complete': self.complete}
+
+
 class OwnedProcessTree:
     """Own only a tree this object creates; never adopt a pre-existing PID."""
     def __init__(self):
@@ -154,7 +201,7 @@ class OwnedProcessTree:
             self.close()
             raise
 
-    def start(self, executable, args, env=None, clear_env_prefixes=()):
+    def start(self, executable, args, env=None, clear_env_prefixes=(), diagnostics=None):
         if not self.job or self.process is not None:
             raise ValueError('OWNED_PROCESS_NEW_TREE_REQUIRED')
         exe = Path(executable)
@@ -162,13 +209,15 @@ class OwnedProcessTree:
             raise ValueError('OWNED_PROCESS_ABSOLUTE_EXECUTABLE_REQUIRED')
         if not isinstance(args, list) or any(not isinstance(a, str) for a in args):
             raise ValueError('OWNED_PROCESS_ARGUMENT_LIST_REQUIRED')
+        attr_count = 2 if diagnostics is not None else 1
         size = SIZE()
-        init_attrs(None, 1, 0, c.byref(size))
+        init_attrs(None, attr_count, 0, c.byref(size))
         if not size.value or size.value > 65536:
             raise OSError('OWNED_PROCESS_ATTRIBUTE_SIZE_UNKNOWN')
         storage = c.create_string_buffer(size.value)
-        checked(init_attrs(storage, 1, 0, c.byref(size)))
+        checked(init_attrs(storage, attr_count, 0, c.byref(size)))
         info = ProcessInfo()
+        read_fd = write_fd = null_fd = None
         try:
             # PROC_THREAD_ATTRIBUTE_JOB_LIST: input attribute number 13.
             jobs = (w.HANDLE * 1)(self.job)
@@ -177,8 +226,24 @@ class OwnedProcessTree:
             startup.startup.cb = c.sizeof(startup)
             startup.attributes = c.cast(storage, c.c_void_p)
             command = c.create_unicode_buffer(subprocess.list2cmdline([str(exe), *args]))
-            # No shell, no inherited handles, no visible window. Job assignment
-            # occurs before execution; there is no create-then-assign race.
+            # No shell or visible window. Job assignment remains atomic.
+            # Only the diagnostic pipe and NUL input may be inherited; the
+            # non-inheritable job handle and controller pipes are excluded.
+            if diagnostics is not None:
+                import msvcrt
+                read_fd, write_fd = os.pipe()
+                null_fd = os.open(os.devnull, os.O_RDONLY | os.O_BINARY)
+                os.set_inheritable(write_fd, True)
+                os.set_inheritable(null_fd, True)
+                write_handle = msvcrt.get_osfhandle(write_fd)
+                null_handle = msvcrt.get_osfhandle(null_fd)
+                handles = (w.HANDLE * 2)(write_handle, null_handle)
+                checked(update_attrs(storage, 0, 0x20002, handles, c.sizeof(handles), None, None))
+                startup.startup.flags |= 0x100  # STARTF_USESTDHANDLES
+                startup.startup.stdin = null_handle
+                startup.startup.stdout = startup.startup.stderr = write_handle
+                diagnostics.start(read_fd)
+                read_fd = None  # reader thread owns it
             environment = None
             flags = 0x08000000 | 0x00080000
             if env is not None:
@@ -201,7 +266,7 @@ class OwnedProcessTree:
                     merged.items(), key=lambda item: item[0].upper())) + '\0\0'
                 environment = c.create_unicode_buffer(block)
                 flags |= 0x00000400  # CREATE_UNICODE_ENVIRONMENT
-            checked(create_process(str(exe), command, None, None, False,
+            checked(create_process(str(exe), command, None, None, diagnostics is not None,
                                    flags, c.cast(environment, c.c_void_p)
                                    if environment is not None else None, None,
                                    c.byref(startup), c.byref(info)))
@@ -218,6 +283,9 @@ class OwnedProcessTree:
             if info.thread:
                 close_handle(info.thread)
             delete_attrs(storage)
+            for fd in (read_fd, write_fd, null_fd):
+                if fd is not None:
+                    os.close(fd)
 
     def close(self):
         job, self.job = getattr(self, 'job', None), None
@@ -312,13 +380,15 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
         commands.put(None)  # Parent/controller closed its pipe: fail closed.
     threading.Thread(target=read_commands, daemon=True).start()
     tree = OwnedProcessTree()
+    diagnostics = OwnedProviderDiagnostics()
     stop_reason = 'REQUESTED_STOP'
     last_seq = 0
     last_sample_ms = 0
     try:
         pid = tree.start(str(exe), ['serve'],
                          env=owned_ollama_environment(context_length),
-                         clear_env_prefixes=('OLLAMA_', 'LLAMA_ARG_'))
+                         clear_env_prefixes=('OLLAMA_', 'LLAMA_ARG_'),
+                         diagnostics=diagnostics)
         listen_deadline = time.monotonic() + 15
         while time.monotonic() < listen_deadline:
             if wait_process(tree.process, 0) != 258:
@@ -395,7 +465,8 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
         close_handle(monitor_handle)
     print(json.dumps({'status': 'OWNED_OLLAMA_STOPPED', 'pid': pid,
                       'port': 11435, 'jobClosed': True,
-                      'stopReason': stop_reason}), flush=True)
+                      'stopReason': stop_reason,
+                      'providerDiagnostics': diagnostics.summary()}), flush=True)
 
 
 def _await_file(file):
@@ -412,6 +483,16 @@ def selftest():
     if os.name != 'nt':
         raise OSError('OWNED_PROCESS_WINDOWS_REQUIRED')
     cases = []
+    diagnostics = OwnedProviderDiagnostics()
+    with OwnedProcessTree() as diagnostic_tree:
+        diagnostic_tree.start(str(Path(sys.executable).resolve()),
+                              ['-c', 'import sys; print("CUDA out of memory SECRET_PRIVATE_PATH", file=sys.stderr); print("context deadline exceeded", file=sys.stdout)'],
+                              diagnostics=diagnostics)
+        if wait_process(diagnostic_tree.process, 5000) != 0:
+            raise RuntimeError('OWNED_DIAGNOSTIC_CHILD_NOT_EXITED')
+    summary = diagnostics.summary()
+    if summary['classes'] != ['MEMORY_ALLOCATION', 'PROVIDER_TIMEOUT'] or not summary['complete'] or summary['chunks'] < 2 or 'SECRET_PRIVATE_PATH' in json.dumps(summary):
+        raise RuntimeError('OWNED_DIAGNOSTIC_PIPE_OR_PRIVACY_FAILED')
     inherited = os.environ.get('OLLAMA_CONTEXT_LENGTH')
     owned_env = owned_ollama_environment()
     if owned_env.get('OLLAMA_HOST') != '127.0.0.1:11435' or \
