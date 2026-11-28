@@ -11,7 +11,7 @@ const model='qwen3:14b',runtime='d'.repeat(64),headSha='a'.repeat(40);
 const start={ramFree:14000,commitHeadroom:33000,gpuFree:16003,gpuTotal:16384};
 const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
 const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
-for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','wrong-usage','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
+for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','estimate-exceeded','missing-usage','wrong-usage','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
  const request=await prepareR125StudioNewRequest({model,prompt,headSha});
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-bounded-test-')),outDir=path.join(root,'run');
  let seq=0,posts=0,approvals=0,stops=0,loaded=false,leased=true;
@@ -36,7 +36,7 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
     try{await Promise.race([loadedObserved,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('TEST_MONITOR_TIMEOUT')),4000)})]);}
     finally{clearTimeout(timer);}
     loaded=false;
-    return JSON.stringify({choices:[{message:{content:original},finish_reason:'stop'}],usage:{prompt_tokens:scenario==='wrong-usage'?9000:4000,completion_tokens:1000}});
+    return JSON.stringify({choices:[{message:{content:original},finish_reason:'stop'}],...(scenario==='missing-usage'?{}:{usage:{prompt_tokens:scenario==='wrong-usage'?13000:scenario==='estimate-exceeded'?9000:4000,completion_tokens:1000}})});
    }};
   }
   assert.equal(init.method,'GET');
@@ -50,10 +50,20 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
   const receipt=summarizeR125StudioRun(request,result,outDir,true);
   const pre=['missing-evidence','low-budget','denied','lease-lost','post-approval-budget'].includes(scenario);
   assert.equal(posts,pre?0:1);assert.equal(result.modelPostCount,posts);assert.ok(stops>=1);
-  if(['success','cross-format-success'].includes(scenario)){
+  if(['success','cross-format-success','estimate-exceeded','missing-usage'].includes(scenario)){
    assert.equal(result.sourceVerified,true,JSON.stringify(result));assert.equal(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(result.resourceMode,'BOUNDED_REAL_REQUEST_TRIAL');assert.equal(result.responseFormatScope,scenario==='cross-format-success'?'JSON_OBJECT_TO_JSON_SCHEMA_UNCALIBRATED':'SAME_FORMAT');assert.equal(result.resourceSafetyCertified,false);assert.equal(result.inferenceMemoryPeakCalibrated,false);
    assert.ok(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')));
   }else{assert.notEqual(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(receipt.runPath,null);}
+  if(['success','cross-format-success','estimate-exceeded','missing-usage','wrong-usage'].includes(scenario)){
+   const captured=fs.readFileSync(path.join(outDir,'BOUNDED_PROVIDER_RESPONSE_ORIGINAL.json'),'utf8');
+   const usage=JSON.parse(fs.readFileSync(path.join(outDir,'BOUNDED_RESPONSE_USAGE.json'),'utf8'));
+   assert.equal(usage.responseSha256,sha(captured));assert.equal(usage.requestSha256,request.requestSha256);
+   assert.equal(JSON.parse(captured).choices[0].message.content,original);
+   assert.equal(usage.status,scenario==='wrong-usage'?'HOLD':scenario==='estimate-exceeded'?'ESTIMATE_EXCEEDED':scenario==='missing-usage'?'USAGE_UNVERIFIED':'WITHIN_ESTIMATE');
+   assert.equal(usage.usageVerified,!['wrong-usage','missing-usage'].includes(scenario));
+   assert.equal(result.actualTokenUsageVerified,usage.usageVerified);
+   if(scenario==='wrong-usage')assert.equal(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')),false);
+  }
   if(['missing-evidence','low-budget'].includes(scenario))assert.equal(approvals,0);
   assert.deepEqual(receipt.BuildPlan.operations,[]);assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
   assert.equal(receipt.worldWrites,0);

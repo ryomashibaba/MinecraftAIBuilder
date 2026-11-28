@@ -21,9 +21,33 @@ export function createStudioBoundedPolicy({request,wireBody,service,evidence}={}
   placementMatches(item){
    return item?.name==='qwen3:14b'&&item.digest===digest&&item.context_length===16384&&Number.isSafeInteger(item.size)&&item.size>=9276198565&&item.size===item.size_vram&&item.size<=data.history.placement.sizeVramBytes;
   },
-  responseWithinBound(value){
+  assessResponseUsage(value){
    const u=value?.usage;
-   return Number.isSafeInteger(inputUpperBound)&&Number.isSafeInteger(u?.prompt_tokens)&&u.prompt_tokens>0&&u.prompt_tokens<=inputUpperBound&&Number.isSafeInteger(u?.completion_tokens)&&u.completion_tokens>0&&u.completion_tokens<=4096&&u.prompt_tokens+u.completion_tokens<=16384;
+   const count=k=>Number.isSafeInteger(u?.[k])&&u[k]>=0?u[k]:null;
+   const promptTokens=count('prompt_tokens'),completionTokens=count('completion_tokens'),totalTokens=count('total_tokens');
+   const actual={promptTokens,completionTokens,totalTokens};
+   const choice=value?.choices?.[0];
+   const base={inputUpperBound,actual,finishReason:typeof choice?.finish_reason==='string'?choice.finish_reason.slice(0,80):null};
+   const answer=(status,reason,allow,usageVerified)=>({...base,status,reason,allow,usageVerified});
+   if(!Number.isSafeInteger(inputUpperBound)||inputUpperBound<=0||inputUpperBound>12288)
+    return answer('HOLD','INPUT_BOUND_INVALID',false,false);
+   // The rendered-input estimate gates PRE-POST only. A completed response
+   // can exceed that estimate without exceeding the configured context.
+   if(promptTokens>12288||completionTokens>4096||totalTokens>16384||
+      (promptTokens!==null&&completionTokens!==null&&promptTokens+completionTokens>16384))
+    return answer('HOLD','REPORTED_HARD_TOKEN_LIMIT_EXCEEDED',false,false);
+   if(['prompt_tokens','completion_tokens','total_tokens'].some(k=>u?.[k]!=null&&count(k)===null))
+    return answer('HOLD','INVALID_REPORTED_TOKEN_COUNT',false,false);
+   if(promptTokens>0&&completionTokens>0)
+    return answer(promptTokens>inputUpperBound?'ESTIMATE_EXCEEDED':'WITHIN_ESTIMATE',
+     promptTokens>inputUpperBound?'ACTUAL_PROMPT_EXCEEDS_ESTIMATE_NOT_CONTEXT':'REPORTED_COUNTS_WITHIN_LIMITS',true,true);
+   // Missing/zero telemetry alone does not discard a normal completed answer.
+   // This is NOT actual-token attestation; the adapter still checks the
+   // response and B143, and the owned runtime/monitor still enforce the limits.
+   if(Array.isArray(value?.choices)&&value.choices.length===1&&choice?.finish_reason==='stop'&&
+      typeof choice?.message?.content==='string'&&choice.message.content.length>0)
+    return answer('USAGE_UNVERIFIED','MISSING_OR_ZERO_PROVIDER_USAGE',true,false);
+   return answer('HOLD','USAGE_UNVERIFIED_AND_RESPONSE_NOT_COMPLETE',false,false);
   }
  });
 }

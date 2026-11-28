@@ -922,7 +922,7 @@ export async function runR125ArchitecturePlanOwned(args,{
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
  }
- let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null,attempted=false;
+ let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null,attempted=false,boundedUsage=null;
  const monitoredFetch=async(url,init={})=>{
   if(url!=='http://127.0.0.1:11435/v1/chat/completions'||
      init.method!=='POST'||posts!==0||(bounded&&attempted)){
@@ -1008,14 +1008,30 @@ export async function runR125ArchitecturePlanOwned(args,{
    // Fetch resolves at headers. Keep the EXISTING monitor alive until the
    // entire response body has arrived, not just until headers are returned.
    const raw=await response.text();
+   // Persist the received envelope before any post-response policy can reject it.
+   // It is private diagnostic evidence, not an accepted SOURCE or calibration.
+   if(bounded){
+    if(Buffer.byteLength(raw,'utf8')>4*1024*1024)throw Error('BOUNDED_RESPONSE_CAPTURE_TOO_LARGE');
+    const dest=path.resolve(args.outDir);
+    if(fs.lstatSync(dest).isSymbolicLink()||!fs.statSync(dest).isDirectory())throw Error('BOUNDED_RESPONSE_CAPTURE_DIR_INVALID');
+    fs.writeFileSync(path.join(dest,'BOUNDED_PROVIDER_RESPONSE_ORIGINAL.json'),raw,{encoding:'utf8',flag:'wx',mode:0o600});
+   }
    clearInterval(pulse);
    // A sample already in flight must settle before accepting the body.
    // Otherwise a late lease/resource failure can be ignored at completion.
    if(pending)await pending;
    if(await projectLease.assertHeld()!==true)fault('PROJECT_LEASE_LOST');
    if(monitorFault||signal.aborted)throw Error('OWNED_MODEL_RESPONSE_INTERRUPTED');
-   if(bounded&&response.ok&&!boundedPolicy.responseWithinBound(JSON.parse(raw)))throw Error('BOUNDED_ACTUAL_TOKEN_USAGE_UNVERIFIED');
-    return {ok:response.ok,status:response.status,json:async()=>JSON.parse(raw)};
+   if(bounded&&response.ok){
+    let value;try{value=JSON.parse(raw);}catch{}
+    boundedUsage=value===undefined?{status:'HOLD',reason:'INVALID_PROVIDER_JSON',allow:false,usageVerified:false}:boundedPolicy.assessResponseUsage(value);
+    fs.writeFileSync(path.join(args.outDir,'BOUNDED_RESPONSE_USAGE.json'),JSON.stringify({
+     schema:'r125-bounded-response-usage-v1',requestSha256:expectedRequest,
+     responseSha256:createHash('sha256').update(raw).digest('hex'),...boundedUsage
+    },null,2),{encoding:'utf8',flag:'wx',mode:0o600});
+    if(!boundedUsage.allow)throw Error('BOUNDED_ACTUAL_TOKEN_USAGE_UNVERIFIED');
+   }
+   return {ok:response.ok,status:response.status,json:async()=>JSON.parse(raw)};
   }finally{
    clearInterval(pulse);
    if(studio&&pending)await pending;
@@ -1063,7 +1079,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  }
  if(studio){
   if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null});
-  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,responseFormatScope:boundedPolicy.evaluate(pre.observedResourcesMiB).responseFormatScope,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
+  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,responseFormatScope:boundedPolicy.evaluate(pre.observedResourcesMiB).responseFormatScope,boundedUsageStatus:boundedUsage?.status??null,actualTokenUsageVerified:boundedUsage?.usageVerified===true,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
  }
  try{
   const raw=fs.readFileSync(path.join(args.outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
@@ -1162,7 +1178,7 @@ async function runOwnedCli(argv){
       !fs.statSync(path.join(args.outDir,'B143_SOURCE_REVIEW_ONLY.json')).isFile())
     throw Error('STUDIO_RUN_ARTIFACT_MISMATCH');
   }catch{result={...result,sourceVerified:false,reason:'STUDIO_RUN_ARTIFACT_MISMATCH'};}
-  const receipt={...summarizeR125StudioRun(request,result,args.outDir,released),...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,resourceEvidenceSha256:result.resourceEvidenceSha256??null,responseFormatScope:result.responseFormatScope??null}:{})};
+  const receipt={...summarizeR125StudioRun(request,result,args.outDir,released),...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,resourceEvidenceSha256:result.resourceEvidenceSha256??null,responseFormatScope:result.responseFormatScope??null,boundedUsageStatus:result.boundedUsageStatus??null,actualTokenUsageVerified:result.actualTokenUsageVerified===true}:{})};
   console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
   return;
  }
