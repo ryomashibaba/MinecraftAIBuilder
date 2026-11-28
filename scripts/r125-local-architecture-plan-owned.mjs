@@ -269,7 +269,10 @@ export async function createWindowsOwnedOllamaController({
  }
 }
 
-const calibratedClearance=(sample,service,now,architectureRequestSha256=ARCHPLAN_REQUEST_SHA256)=>
+const calibratedClearance=(sample,service,now,architectureRequestSha256=ARCHPLAN_REQUEST_SHA256,studio=false)=>
+ (!studio||(sample?.calibrationResponseFormat==='json_schema'&&
+  SHA256_RE.test(service.ollamaExecutableSha256??'')&&
+  sample?.calibrationOllamaExecutableSha256===service.ollamaExecutableSha256))&&
  sample?.status==='SAFE_FOR_ONE_REQUEST'&&
  sample?.resourceSafetyCertified===true&&
  sample?.inferenceMemoryPeakCalibrated===true&&
@@ -573,7 +576,8 @@ export async function runR125ResourceCalibrationOwned({
   purpose:'RESOURCE_CALIBRATION',requestSha256:request.requestSha256,
   model:MODEL,modelDigest:MODEL_DIGEST,headSha:service.headSha,
   endpoint:url,maxPosts:1,automaticRetries:0,contextLength:CONTEXT_LENGTH,
-  maxOutputTokens:MAX_OUTPUT_TOKENS})===true;}catch{}
+  maxOutputTokens:MAX_OUTPUT_TOKENS,responseFormat:'json_schema',
+   ollamaExecutableSha256:service.ollamaExecutableSha256})===true;}catch{}
  if(!approved)
   return fail('INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED');
  if(projectLease!==null){
@@ -806,12 +810,12 @@ export async function runR125ArchitecturePlanOwned(args,{
   const calibrated=await calibratedResourceProbe({sensor,service,phase,model:MODEL,
    headSha:service.headSha,...(studio?{architectureRequestSha256:expectedRequest,
     wireBody:studioWireBody,mode:'new'}: {})});
-  if(!calibratedClearance(calibrated,service,now(),expectedRequest))return sensor;
+  if(!calibratedClearance(calibrated,service,now(),expectedRequest,studio))return sensor;
   return calibrated;
  };
  let pre;
  try{pre=await attest('PRE_POST');}catch{pre=null;}
- if(!calibratedClearance(pre,service,now(),expectedRequest)){
+ if(!calibratedClearance(pre,service,now(),expectedRequest,studio)){
   const stopped=await service.stop('UNCALIBRATED_PRE_POST_HOLD');
   return hold(pre?.reason??'QWEN_PEAK_CALIBRATION_REQUIRED',{
    observedResourcesMiB:pre?.observedResourcesMiB??null,
@@ -827,7 +831,7 @@ export async function runR125ArchitecturePlanOwned(args,{
    catch(error){
     if(!['PREFLIGHT_OWNED_TAGS_TIMEOUT','PREFLIGHT_OWNED_TAGS_CONNECTION_RESET'].includes(error?.message))throw error;
     const fresh=await attest('PRE_POST',{waitForNewSequence:true});
-    if(!calibratedClearance(fresh,service,now(),expectedRequest)||
+    if(!calibratedClearance(fresh,service,now(),expectedRequest,studio)||
        fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
     pre=fresh;
     if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
@@ -859,7 +863,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   // independently measured clearance; never extend the old one.
   if(studio){
    const fresh=await attest('PRE_POST',{waitForNewSequence:true});
-   if(!calibratedClearance(fresh,service,now(),expectedRequest)||
+   if(!calibratedClearance(fresh,service,now(),expectedRequest,studio)||
       fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
    pre=fresh;
   }
@@ -885,7 +889,8 @@ export async function runR125ArchitecturePlanOwned(args,{
      await exactRequestApprovalVerifier({requestSha256,model:MODEL,
        headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0,
        purpose:'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir,
-        mode:'new',wireBody:studioWireBody,modelDigest:MODEL_DIGEST}:{}),contextLength:CONTEXT_LENGTH,
+        mode:'new',wireBody:studioWireBody,modelDigest:MODEL_DIGEST,responseFormat:'json_schema',
+         ollamaExecutableSha256:service.ollamaExecutableSha256}:{}),contextLength:CONTEXT_LENGTH,
        maxOutputTokens:MAX_OUTPUT_TOKENS,
        calibrationProofSha256:pre.calibrationProofSha256})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
@@ -894,7 +899,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   if(studio){
    if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
    if(init.signal?.aborted)throw Error('MODEL_REQUEST_ABORTED');
-   if(!calibratedClearance(previous,service,now(),expectedRequest))throw Error('PRE_POST_CLEARANCE_EXPIRED');
+   if(!calibratedClearance(previous,service,now(),expectedRequest,studio))throw Error('PRE_POST_CLEARANCE_EXPIRED');
   }
   posts++;
   const stopController=new AbortController();
@@ -921,7 +926,7 @@ export async function runR125ArchitecturePlanOwned(args,{
      if(exactLoadedModel(active))loadedSeen=true;
      else if(!Array.isArray(active?.models)||active.models.length!==0)throw Error('LOADED_MODEL_IDENTITY_MISMATCH');
     }
-    if(!calibratedClearance(sample,service,now(),expectedRequest)||
+    if(!calibratedClearance(sample,service,now(),expectedRequest,studio)||
        sample.monitorHeartbeatEpochMs<=previous.monitorHeartbeatEpochMs||
        sample.monitorSequence<=previous.monitorSequence)
      fault('RESOURCE_OR_HEARTBEAT_HOLD');
