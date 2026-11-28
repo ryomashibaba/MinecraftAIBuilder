@@ -945,6 +945,8 @@ export async function runR125ArchitecturePlanOwned(args,{
        maxOutputTokens:MAX_OUTPUT_TOKENS,
        ...(bounded?{resourceEvidenceSha256:boundedPolicy.evidenceSha256,
         resourceBudgetMiB:boundedPolicy.evaluate(pre.observedResourcesMiB).requiredMiB,
+        responseFormatScope:boundedPolicy.evaluate(pre.observedResourcesMiB).responseFormatScope,
+        resourceReserveMiB:boundedPolicy.evaluate(pre.observedResourcesMiB).reserveMiB,
         inferenceMemoryPeakCalibrated:false}:{calibrationProofSha256:pre.calibrationProofSha256})})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
    throw Error('EXACT_ARCHPLAN_REQUEST_APPROVAL_REQUIRED');
@@ -1061,7 +1063,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  }
  if(studio){
   if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null});
-  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
+  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,responseFormatScope:boundedPolicy.evaluate(pre.observedResourcesMiB).responseFormatScope,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
  }
  try{
   const raw=fs.readFileSync(path.join(args.outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
@@ -1160,7 +1162,7 @@ async function runOwnedCli(argv){
       !fs.statSync(path.join(args.outDir,'B143_SOURCE_REVIEW_ONLY.json')).isFile())
     throw Error('STUDIO_RUN_ARTIFACT_MISMATCH');
   }catch{result={...result,sourceVerified:false,reason:'STUDIO_RUN_ARTIFACT_MISMATCH'};}
-  const receipt={...summarizeR125StudioRun(request,result,args.outDir,released),...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,resourceEvidenceSha256:result.resourceEvidenceSha256??null}:{})};
+  const receipt={...summarizeR125StudioRun(request,result,args.outDir,released),...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,resourceEvidenceSha256:result.resourceEvidenceSha256??null,responseFormatScope:result.responseFormatScope??null}:{})};
   console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
   return;
  }
