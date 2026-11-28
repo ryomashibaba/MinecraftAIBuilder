@@ -883,9 +883,23 @@ export async function runR125ArchitecturePlanOwned(args,{
  }
   // Identity and idle checks are GET-only. Shared 11434 is queried read-only
   // for an idle check; this path never posts to or stops that service.
+ // Bounded startup retries GET only; refresh independent clearance.
+ const boundedStartupGet=async(url,label)=>{
+  try{return await preflightJsonObject(fetcher,url,label);}
+  catch(error){
+   if(!new RegExp('^PREFLIGHT_'+label+'_(TIMEOUT|CONNECTION_RESET|CONNECTION_REFUSED)$').test(error?.message??''))throw error;
+   const fresh=await attest('PRE_POST',{waitForNewSequence:true});
+   if(!clearance(fresh)||fresh.monitorSequence<=pre.monitorSequence)
+    throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
+   pre=fresh;
+   if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+   return preflightJsonObject(fetcher,url,label,10000);
+  }
+ };
  try{
   let tags;
-  if(studio){
+  if(bounded)tags=await boundedStartupGet('http://127.0.0.1:11435/api/tags','OWNED_TAGS');
+  else if(studio){
    try{tags=await preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/tags','OWNED_TAGS');}
    catch(error){
     if(!['PREFLIGHT_OWNED_TAGS_TIMEOUT','PREFLIGHT_OWNED_TAGS_CONNECTION_RESET'].includes(error?.message))throw error;
@@ -902,12 +916,18 @@ export async function runR125ArchitecturePlanOwned(args,{
    tags=tagsResponse?.ok?await tagsResponse.json():null;
   }
   const matches=tags?.models?.filter(entry=>entry?.name===MODEL)??[];
+  let ps,shared;
+  if(bounded){
+   ps=await boundedStartupGet('http://127.0.0.1:11435/api/ps','OWNED_PS');
+   shared=await boundedStartupGet('http://127.0.0.1:11434/api/ps','SHARED_PS');
+  }else{
   const psResponse=await fetcher('http://127.0.0.1:11435/api/ps',
    {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
-  const ps=psResponse?.ok?await psResponse.json():null;
+  ps=psResponse?.ok?await psResponse.json():null;
   const sharedResponse=await fetcher('http://127.0.0.1:11434/api/ps',
    {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
-  const shared=sharedResponse?.ok?await sharedResponse.json():null;
+  shared=sharedResponse?.ok?await sharedResponse.json():null;
+  }
   if(matches.length!==1||matches[0].digest!==MODEL_DIGEST||
      matches[0].size!==MODEL_SIZE||matches[0].details?.quantization_level!=='Q4_K_M'||
      !Array.isArray(ps?.models)||ps.models.length!==0||
@@ -926,11 +946,14 @@ export async function runR125ArchitecturePlanOwned(args,{
       fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
    pre=fresh;
   }
- }catch{
+ }catch(error){
   const stopped=await service.stop('OWNED_MODEL_PREFLIGHT_FAILED');
-  return hold('OWNED_MODEL_PREFLIGHT_UNAVAILABLE',{
+  const message=String(error?.message??'');
+  const detail=/^(?:PREFLIGHT_(?:OWNED_TAGS|OWNED_PS|SHARED_PS)_(?:TIMEOUT|CONNECTION_RESET|CONNECTION_REFUSED|COMMUNICATION_ERROR|INVALID_JSON|HTTP_(?:[1-5][0-9]{2}|UNKNOWN))|RESOURCE_OR_HEARTBEAT_HOLD|PROJECT_LEASE_LOST|PRE_POST_MONITOR_SEQUENCE_TIMEOUT)$/.test(message)?message:'PREFLIGHT_UNCLASSIFIED';
+  return hold(bounded?detail:'OWNED_MODEL_PREFLIGHT_UNAVAILABLE',{
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
-   monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
+   monitorStopConfirmed:stopped?.monitorStopConfirmed===true,
+   ...(bounded?{ownedProviderDiagnostics:safeProviderDiagnostics(stopped?.providerDiagnostics),ownedProviderStopReason:safeStopReason(stopped?.providerStopReason)}:{})});
  }
  let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null,attempted=false,boundedUsage=null,transportCode=null,transportPhase=null,monitorStopReason=null;
  const monitoredFetch=async(url,init={})=>{

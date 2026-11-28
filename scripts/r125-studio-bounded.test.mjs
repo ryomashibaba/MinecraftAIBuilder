@@ -11,10 +11,11 @@ const model='qwen3:14b',runtime='d'.repeat(64),headSha='a'.repeat(40);
 const start={ramFree:14000,commitHeadroom:33000,gpuFree:16003,gpuTotal:16384};
 const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
 const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
-for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','estimate-exceeded','missing-usage','wrong-usage','transport-failure','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
+for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','estimate-exceeded','missing-usage','wrong-usage','transport-failure','shared-busy','tags-transient','owned-ps-transient','shared-ps-transient','shared-ps-permanent','owned-ps-invalid-json'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
  const request=await prepareR125StudioNewRequest({model,prompt,headSha});
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-bounded-test-')),outDir=path.join(root,'run');
  let seq=0,posts=0,approvals=0,stops=0,loaded=false,leased=true;
+ const getCounts=new Map();
  let observed;const loadedObserved=new Promise(resolve=>{observed=resolve});
  const controller={headSha,port:11435,servicePid:5001,supervisorPid:5000,monitorPid:4999,monitorId:'a'.repeat(32),killOnCloseJob:true,configuredContextLength:16384,ollamaExecutableSha256:runtime,configuredParallelRequests:1,configuredMaxLoadedModels:1,configuredKeepAliveSeconds:0,cloudDisabled:true,configuredFlashAttention:false,configuredKvCacheType:'f16',configuredGpuOverheadBytes:0,configuredScheduleSpread:false,configuredMaxQueue:1,
  async checkResourceSafety({phase}){
@@ -41,6 +42,10 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
    }};
   }
   assert.equal(init.method,'GET');
+  const n=(getCounts.get(url)??0)+1;getCounts.set(url,n);
+  const target=scenario==='tags-transient'?'http://127.0.0.1:11435/api/tags':scenario==='owned-ps-transient'?'http://127.0.0.1:11435/api/ps':['shared-ps-transient','shared-ps-permanent'].includes(scenario)?'http://127.0.0.1:11434/api/ps':null;
+  if(url===target&&(n===1||scenario==='shared-ps-permanent'))throw new TypeError('fetch failed',{cause:{code:'ECONNRESET'}});
+  if(scenario==='owned-ps-invalid-json'&&url==='http://127.0.0.1:11435/api/ps')return {ok:true,json:async()=>{throw Error('bad json')}};
   if(url.endsWith('/api/tags'))return {ok:true,json:async()=>({models:[{name:model,digest,size:9276198565,details:{quantization_level:'Q4_K_M'}}]})};
   if(url==='http://127.0.0.1:11435/api/ps'&&loaded)return {ok:true,json:async()=>{observed();return {models:[{name:model,digest,context_length:16384,size:12949368339,size_vram:scenario==='wrong-placement'?9276198565:12949368339}]}}};
   if(url==='http://127.0.0.1:11434/api/ps'&&posts&&scenario==='shared-busy')return {ok:true,json:async()=>({models:[{name:'other'}]})};
@@ -49,9 +54,9 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
  try{
   const result=await runR125ArchitecturePlanOwned({model,prompt,outDir},{controller,studioRequest:request,projectLease:{assertHeld:async()=>leased},boundedStudio,calibratedResourceProbe:()=>{throw Error('legacy calibration must not be used')},exactRequestApprovalVerifier:()=>{throw Error('legacy approval must not be used')},fetcher});
   const receipt=summarizeR125StudioRun(request,result,outDir,true);
-  const pre=['missing-evidence','low-budget','denied','lease-lost','post-approval-budget'].includes(scenario);
+  const pre=['missing-evidence','low-budget','denied','lease-lost','post-approval-budget','shared-ps-permanent','owned-ps-invalid-json'].includes(scenario);
   assert.equal(posts,pre?0:1);assert.equal(result.modelPostCount,posts);assert.ok(stops>=1);
-  if(['success','cross-format-success','estimate-exceeded','missing-usage'].includes(scenario)){
+  if(['success','cross-format-success','estimate-exceeded','missing-usage','tags-transient','owned-ps-transient','shared-ps-transient'].includes(scenario)){
    assert.equal(result.sourceVerified,true,JSON.stringify(result));assert.equal(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(result.resourceMode,'BOUNDED_REAL_REQUEST_TRIAL');assert.equal(result.responseFormatScope,scenario==='cross-format-success'?'JSON_OBJECT_TO_JSON_SCHEMA_UNCALIBRATED':'SAME_FORMAT');assert.equal(result.resourceSafetyCertified,false);assert.equal(result.inferenceMemoryPeakCalibrated,false);
    assert.ok(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')));
   }else{assert.notEqual(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(receipt.runPath,null);}
@@ -73,7 +78,13 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
    assert.equal(receipt.unloadConfirmed,false);assert.equal(receipt.sourceVerified,false);
    assert.equal(JSON.stringify(receipt).includes('PRIVATE'),false);
   }
-  if(['missing-evidence','low-budget'].includes(scenario))assert.equal(approvals,0);
+  if(scenario==='shared-ps-permanent'){
+   assert.equal(receipt.reason,'PREFLIGHT_SHARED_PS_CONNECTION_RESET');assert.equal(getCounts.get('http://127.0.0.1:11434/api/ps'),2);
+  }
+  if(scenario==='owned-ps-invalid-json'){
+   assert.equal(receipt.reason,'PREFLIGHT_OWNED_PS_INVALID_JSON');assert.equal(getCounts.get('http://127.0.0.1:11435/api/ps'),1);
+  }
+  if(['missing-evidence','low-budget','shared-ps-permanent','owned-ps-invalid-json'].includes(scenario))assert.equal(approvals,0);
   assert.deepEqual(receipt.BuildPlan.operations,[]);assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
   assert.equal(receipt.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
