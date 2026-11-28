@@ -463,3 +463,25 @@ test('calibration HTTP 500 classifies bounded error stream without retaining raw
   assert.equal(result.ownedServiceStopConfirmed,true);assert.equal(result.monitorStopConfirmed,true);
  }
 });
+
+test('calibration keeps only allowlisted owner diagnostic summary',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ for(const valid of [true,false]){
+  let checks=0,posts=0;
+  const controller=calibrationController(async()=>sensor(++checks));
+  controller.stop=async()=>({ownerStopConfirmed:true,monitorStopConfirmed:true,
+   providerDiagnostics:{classes:valid?['MODEL_RUNNER_EXIT']:['SECRET_PRIVATE_PATH'],
+    chunks:12,complete:true,raw:'SECRET_PRIVATE_PATH'}});
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+   calibrationRequestSha256:sha},{controller,approvalVerifier:async()=>true,
+   fetcher:async(url,init={})=>{
+    if(init.method!=='POST')return calibrationPreflightFetcher(url,init);
+    posts++;return new Response(JSON.stringify({error:{message:'runner exited'}}),{status:500});
+   },pollMs:250,timeoutMs:5000});
+  assert.equal(result.reason,'CALIBRATION_POST_HTTP_FAILED');
+  assert.equal(posts,1);assert.equal(result.automaticRetries,0);
+  assert.deepEqual(result.ownedProviderDiagnostics,valid?{classes:['MODEL_RUNNER_EXIT'],chunks:12,complete:true}:undefined);
+  assert.equal(JSON.stringify(result).includes('SECRET_PRIVATE_PATH'),false);
+  assert.equal(result.unloadedConfirmed,true);
+ }
+});
