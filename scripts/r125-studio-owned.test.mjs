@@ -38,7 +38,7 @@ test('Studio never imports a mere SOURCE report or unsettled process',async()=>{
 
 /** Real adapter + runner + B143 compiler; only HTTP and resource/lease
  * providers are injected. No model, network, world or Windows process. */
-for(const startupTimeout of [false,true])test('Studio owned path produces a real SOURCE receipt (startup timeout='+startupTimeout+')', {timeout:15000}, async()=>{
+for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio owned path produces a real SOURCE receipt (startup failure='+startupFailure+')', {timeout:15000}, async()=>{
  const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
  const request=await prepareR125StudioNewRequest({...input,prompt});
  const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
@@ -81,7 +81,7 @@ for(const startupTimeout of [false,true])test('Studio owned path produces a real
   assert.equal(init.method,'GET');
   if(url.endsWith('/api/tags')){
    tagsCalls++;
-   if(startupTimeout&&tagsCalls===1){const error=Error('startup timeout');error.name='TimeoutError';throw error;}
+   if(startupFailure&&tagsCalls===1){const error=Error('startup transport');if(startupFailure==='TIMEOUT')error.name='TimeoutError';else error.cause={code:'ECONNRESET'};throw error;}
    return {ok:true,json:async()=>({models:[{
     name:input.model,digest,size:9276198565,details:{quantization_level:'Q4_K_M'}}]})};
   }
@@ -101,7 +101,7 @@ for(const startupTimeout of [false,true])test('Studio owned path produces a real
      x.briefSha256===request.briefSha256&&x.outDir===outDir;
    },fetcher});
   assert.equal(posts,1);assert.equal(approval,1);assert.equal(stops,1);
-  assert.equal(tagsCalls,startupTimeout?2:1);assert.ok(seq>=(startupTimeout?4:3));
+  assert.equal(tagsCalls,startupFailure?2:1);assert.ok(seq>=(startupFailure?4:3));
   assert.equal(result.sourceVerified,true,JSON.stringify(result));
   const saved=JSON.parse(fs.readFileSync(path.join(outDir,'RUN_REPORT.json'),'utf8'));
   const receipt=summarizeR125StudioRun(request,result,outDir,true);
