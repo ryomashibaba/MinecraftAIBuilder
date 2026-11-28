@@ -15,6 +15,15 @@ import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirec
 import {createR125ArchitecturePlanLocalAdapter} from '../source/ai/b198g-local-model-adapter.mjs';
 import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
 
+const PROVIDER_DIAGNOSTIC_CLASSES=new Set(['MEMORY_ALLOCATION','GPU_RUNTIME','MODEL_RUNNER_EXIT',
+ 'MODEL_FILE_OR_FORMAT','REQUEST_OR_CONTEXT','MODEL_LOAD','PROVIDER_TIMEOUT']);
+function safeProviderDiagnostics(value){
+ if(!value||!Array.isArray(value.classes)||value.classes.length>PROVIDER_DIAGNOSTIC_CLASSES.size||
+    !value.classes.every(x=>PROVIDER_DIAGNOSTIC_CLASSES.has(x))||
+    !Number.isSafeInteger(value.chunks)||value.chunks<0||value.chunks>1000000||
+    typeof value.complete!=='boolean')return null;
+ return {classes:[...new Set(value.classes)].sort(),chunks:value.chunks,complete:value.complete};
+}
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const OWNER=path.join(ROOT,'scripts/r125-windows-owned-process.py');
 const SENSOR=path.join(ROOT,'scripts/research/r125-gatec-v3-1-stale-only.py');
@@ -107,12 +116,13 @@ export async function createWindowsOwnedOllamaController({
  fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head,
   ownedCalibration:true}),{flag:'wx'});
  let monitor=null,owner=null,lines=null,ownerQueue=[],ownerWaiters=[];
-  let service=null,stopped=false,sequence=0,ownerStopAck=false;
+  let service=null,stopped=false,sequence=0,ownerStopAck=false,providerDiagnostics=null;
  const pushLine=value=>{
   try{
    const message=JSON.parse(value);
    if(message.status==='OWNED_OLLAMA_STOPPED'&&message.jobClosed===true&&
-      message.pid===service?.servicePid)ownerStopAck=true;
+      message.pid===service?.servicePid){ownerStopAck=true;
+    providerDiagnostics=safeProviderDiagnostics(message.providerDiagnostics);}
   }catch{}
   const waiter=ownerWaiters.shift();
   if(waiter)waiter.resolve(value);else ownerQueue.push(value);
@@ -129,7 +139,7 @@ export async function createWindowsOwnedOllamaController({
  const stop=async reason=>{
   if(stopped)return {stopped:true,ownerStopConfirmed:ownerStopAck,
    monitorStopConfirmed:monitor===null||hasExited(monitor),
-   reason,servicePid:service?.servicePid};
+   reason,servicePid:service?.servicePid,providerDiagnostics};
   stopped=true;
   let ownerStopConfirmed=ownerStopAck;
   if(owner&&!hasExited(owner)){
@@ -165,7 +175,7 @@ export async function createWindowsOwnedOllamaController({
   }
   try{removeOwnedTempDir(dir);}catch{}
   return {stopped:true,ownerStopConfirmed:ownerStopAck,monitorStopConfirmed,
-   reason,servicePid:service?.servicePid};
+   reason,servicePid:service?.servicePid,providerDiagnostics};
  };
  try{
   monitor=spawnProcess(pythonExe,[SENSOR,'--role','monitor','--folder',dir,
@@ -343,7 +353,9 @@ async function classifyCalibrationHttpFailure(response){
     chunks.push(Buffer.from(value));
    }
    let error;
-   try{error=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error;}catch{return 'ERROR_BODY_NOT_JSON';}
+   try{const envelope=JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    error=typeof envelope?.error==='string'?envelope.error:envelope?.error?.message;
+   }catch{return 'ERROR_BODY_NOT_JSON';}
    if(typeof error!=='string')return 'ERROR_MESSAGE_UNAVAILABLE';
    if(/out of memory|not enough memory|insufficient (?:gpu |system )?memory|failed to allocate|cuda_error_out_of_memory/i.test(error))return 'MEMORY_ALLOCATION';
    if(/(?:cuda|cublas|gpu|vulkan|rocm).*(?:error|failed|unavailable|not found)|(?:error|failed).*\b(?:cuda|cublas|gpu|vulkan|rocm)\b/i.test(error))return 'GPU_RUNTIME';
@@ -421,6 +433,8 @@ export async function runR125ResourceCalibrationOwned({
    const result=await service?.stop?.(reason);
    report.ownedServiceStopConfirmed=result?.ownerStopConfirmed===true;
    report.monitorStopConfirmed=result?.monitorStopConfirmed===true;
+   const diagnostics=safeProviderDiagnostics(result?.providerDiagnostics);
+   if(diagnostics)report.ownedProviderDiagnostics=diagnostics;
    if(report.ownedServiceStopConfirmed&&report.monitorStopConfirmed){
     report.unloadedConfirmed=true;
     report.unloadProof='OWNED_KILL_ON_CLOSE_JOB_TERMINATED';
@@ -1158,7 +1172,8 @@ async function runOwnedCalibrationCli(argv){
   ownedTagsReadOnlyRetrySucceeded:result.ownedTagsReadOnlyRetrySucceeded===true,
   calibrationHttpStatus:result.calibrationHttpStatus??null,
   calibrationHttpElapsedMs:result.calibrationHttpElapsedMs??null,
-  calibrationHttpErrorClass:result.calibrationHttpErrorClass??null,worldWrites:0}));
+  calibrationHttpErrorClass:result.calibrationHttpErrorClass??null,
+  ownedProviderDiagnostics:result.ownedProviderDiagnostics??null,worldWrites:0}));
  if(result.status!=='CALIBRATION_PASS')process.exitCode=2;
 }
 
