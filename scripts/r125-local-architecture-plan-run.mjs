@@ -238,13 +238,15 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
 reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false,
-revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materialsTrial=false,compactDesign=false
+revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materialsTrial=false,compactDesign=false,ownedSchema=false
 },{fetcher=fetch,timeoutMs=180000,signal}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
  if(typeof repairOnce!=='boolean'||typeof trialMode!=='boolean'||typeof spatialTreeOnly!=='boolean')
   fail('INVALID_RUN_MODE');
  if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
+ if(typeof ownedSchema!=='boolean'||ownedSchema&&(endpoint!=='http://127.0.0.1:11435/v1/chat/completions'||trialMode||repairOnce))
+  fail('OWNED_SCHEMA_REQUIRES_SINGLE_OWNED_REQUEST');
  if(revisionPlanPath!==null&&(typeof revisionPlanPath!=='string'||
    !revisionPlanPath.trim()||repairOnce))fail('INVALID_REVISION_PLAN_OPTION');
  if(revisionDiagnosisPath!==null&&(typeof revisionDiagnosisPath!=='string'||
@@ -297,7 +299,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
   model,endpoint,fetcher:selectedTransport,allowDelegatedDimensions:materialsTrial,
-  timeoutMs,reasoningEffort,maxOutputTokens,spatialTreeOnly,signal,
+  timeoutMs,reasoningEffort,maxOutputTokens,spatialTreeOnly,signal,ownedSchema,
   onRawModelResponse(raw,{finishReason,usage,captureKind='model-message-content'}){
    captured={sha256:sha(raw),finishReason,usage,captureKind};
    if(captureKind==='provider-envelope-invalid-content')
@@ -336,7 +338,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
   ...(materialsTrial?{materialsTrial:true,extendedContract:'V38.5',designPromptProfile:compactDesign?'compact-spatial-v1':'full',partialShapeConstruction:'NOT_ATTESTED'}:{}),
   executionMode:trialMode?'WINDOWS_LOCAL_TRIAL_SINGLE_REQUEST':'OWNED_WINDOWS_ONE_SHOT',
   requestedGenerationSettings:{temperature:0.55,
-   responseFormat:r125ResponseFormatForEndpoint(endpoint,{spatialTreeOnly}).type,
+   responseFormat:r125ResponseFormatForEndpoint(endpoint,{spatialTreeOnly,ownedSchema}).type,
    ...(spatialTreeOnly?{spatialTreeOnlyHostConstrained:true}:{}),maxOutputTokens,
    reasoningEffort:reasoningEffort??null,timeoutMs},
   attemptLimit:repairOnce?2:1,automaticRetries:0,
