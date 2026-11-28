@@ -382,6 +382,7 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
     tree = OwnedProcessTree()
     diagnostics = OwnedProviderDiagnostics()
     stop_reason = 'REQUESTED_STOP'
+    pid = None
     last_seq = 0
     last_sample_ms = 0
     try:
@@ -460,13 +461,24 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
                 stop_reason = 'COMMAND_REJECTED'
                 break
             break
+    except Exception as exc:
+        # An unexpected exit used to skip the stop receipt entirely.
+        # Keep only a fixed classification, never exception text or paths.
+        stop_reason = ('OWNED_OLLAMA_EXITED_UNEXPECTEDLY'
+                       if str(exc) == 'OWNED_OLLAMA_EXITED_UNEXPECTEDLY'
+                       else 'OWNED_SUPERVISOR_EXCEPTION')
+        raise
     finally:
-        tree.close()
-        close_handle(monitor_handle)
-    print(json.dumps({'status': 'OWNED_OLLAMA_STOPPED', 'pid': pid,
-                      'port': 11435, 'jobClosed': True,
-                      'stopReason': stop_reason,
-                      'providerDiagnostics': diagnostics.summary()}), flush=True)
+        try:
+            tree.close()
+        finally:
+            close_handle(monitor_handle)
+        # Emitted only after confirmed Job close, including exception paths.
+        if pid is not None:
+            print(json.dumps({'status': 'OWNED_OLLAMA_STOPPED', 'pid': pid,
+                              'port': 11435, 'jobClosed': True,
+                              'stopReason': stop_reason,
+                              'providerDiagnostics': diagnostics.summary()}), flush=True)
 
 
 def _await_file(file):

@@ -11,7 +11,7 @@ const model='qwen3:14b',runtime='d'.repeat(64),headSha='a'.repeat(40);
 const start={ramFree:14000,commitHeadroom:33000,gpuFree:16003,gpuTotal:16384};
 const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
 const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
-for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','estimate-exceeded','missing-usage','wrong-usage','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
+for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','estimate-exceeded','missing-usage','wrong-usage','transport-failure','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
  const request=await prepareR125StudioNewRequest({model,prompt,headSha});
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-bounded-test-')),outDir=path.join(root,'run');
  let seq=0,posts=0,approvals=0,stops=0,loaded=false,leased=true;
@@ -22,7 +22,7 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
   if(scenario==='low-budget'||(scenario==='post-approval-budget'&&approvals))resources.gpuFree=15000;
   if(phase==='DURING_INFERENCE'&&scenario==='during-floor')resources.gpuFree=1000;
   return {independentMonitorActive:true,ownedServiceInKillOnCloseJob:true,ownedServicePort:11435,ownedServicePid:5001,supervisorPid:5000,monitorPid:4999,monitorId:'a'.repeat(32),monitorHeartbeatEpochMs:now,monitorSequence:++seq,observedResourcesMiB:resources};
- },async stop(){stops++;loaded=false;observed();return {ownerStopConfirmed:true,monitorStopConfirmed:true}}};
+ },async stop(){stops++;loaded=false;observed();return {ownerStopConfirmed:true,monitorStopConfirmed:true,...(scenario==='transport-failure'?{providerDiagnostics:{classes:['MODEL_RUNNER_EXIT','MEMORY_ALLOCATION'],chunks:6,complete:true,raw:'PRIVATE'},providerStopReason:'OWNED_OLLAMA_EXITED_UNEXPECTEDLY'}:{})}}};
  const evidence={schema:'r125-studio-bounded-private-evidence-v1',provenanceVerified:scenario!=='missing-evidence',headSha,requestSha256:request.requestSha256,
   tokenObservation:{requestSha256:request.requestSha256,modelDigest:digest,runtimeSha256:runtime,inputUpperBound:8000},
   history:{runtimeSha256:runtime,modelDigest:digest,contextLength:16384,maxOutputTokens:4096,responseFormat:scenario==='cross-format-success'?'json_object':'json_schema',kvCacheType:'f16',flashAttention:false,parallel:1,maxLoadedModels:1,evidenceSha256:'b'.repeat(64),start,minimum:{ramFree:11000,commitHeadroom:22000,gpuFree:3650,gpuTotal:16384},placement:{sizeBytes:12949368339,sizeVramBytes:12949368339}}};
@@ -31,6 +31,7 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
  const fetcher=async(url,init)=>{
   if(init.method==='POST'){
    assert.equal(url,request.endpoint);assert.equal(sha(init.body),request.requestSha256);assert.equal(approvals,1);posts++;loaded=true;
+   if(scenario==='transport-failure')throw new TypeError('fetch failed',{cause:Object.assign(new Error('PRIVATE_SOCKET'),{code:'UND_ERR_SOCKET'})});
    return {ok:true,status:200,async text(){
     let timer;
     try{await Promise.race([loadedObserved,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('TEST_MONITOR_TIMEOUT')),4000)})]);}
@@ -63,6 +64,14 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
    assert.equal(usage.usageVerified,!['wrong-usage','missing-usage'].includes(scenario));
    assert.equal(result.actualTokenUsageVerified,usage.usageVerified);
    if(scenario==='wrong-usage')assert.equal(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')),false);
+  }
+  if(scenario==='transport-failure'){
+   assert.equal(receipt.reason,'MODEL_UNLOAD_UNCONFIRMED');
+   assert.equal(receipt.transportFailureCode,'UND_ERR_SOCKET');assert.equal(receipt.transportFailurePhase,'HEADERS');
+   assert.equal(receipt.ownedProviderStopReason,'OWNED_OLLAMA_EXITED_UNEXPECTEDLY');
+   assert.deepEqual(receipt.ownedProviderDiagnostics,{classes:['MODEL_RUNNER_EXIT','MEMORY_ALLOCATION'],chunks:6,complete:true});
+   assert.equal(receipt.unloadConfirmed,false);assert.equal(receipt.sourceVerified,false);
+   assert.equal(JSON.stringify(receipt).includes('PRIVATE'),false);
   }
   if(['missing-evidence','low-budget'].includes(scenario))assert.equal(approvals,0);
   assert.deepEqual(receipt.BuildPlan.operations,[]);assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));

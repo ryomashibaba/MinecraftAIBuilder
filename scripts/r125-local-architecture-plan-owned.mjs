@@ -25,6 +25,15 @@ function safeProviderDiagnostics(value){
     typeof value.complete!=='boolean')return null;
  return {classes:[...new Set(value.classes)].sort(),chunks:value.chunks,complete:value.complete};
 }
+const STOP_REASONS=new Set(['REQUESTED_STOP','OWNED_PORT_IDENTITY_MISMATCH','INDEPENDENT_MONITOR_EXITED',
+ 'SENSOR_SENSOR_SAMPLE_INVALID_OR_STALE','SENSOR_SENSOR_HEARTBEAT_NOT_ADVANCING','SENSOR_SENSOR_SEQUENCE_ROLLBACK',
+ 'CONTROLLER_DISCONNECTED','COMMAND_REJECTED','OWNED_OLLAMA_EXITED_UNEXPECTEDLY','OWNED_SUPERVISOR_EXCEPTION']);
+const safeStopReason=value=>STOP_REASONS.has(value)?value:null;
+const TRANSPORT_CODES=new Set(['ECONNRESET','ECONNREFUSED','EPIPE','ETIMEDOUT','UND_ERR_SOCKET','UND_ERR_CONNECT_TIMEOUT','UND_ERR_HEADERS_TIMEOUT','UND_ERR_BODY_TIMEOUT','ABORT_ERR']);
+function transportFailureCode(error){
+ for(let e=error,i=0;e&&i<4;e=e.cause,i++)if(TRANSPORT_CODES.has(e.code))return e.code;
+ return error?.name==='AbortError'?'ABORT_ERR':null;
+}
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const OWNER=path.join(ROOT,'scripts/r125-windows-owned-process.py');
 const SENSOR=path.join(ROOT,'scripts/research/r125-gatec-v3-1-stale-only.py');
@@ -131,14 +140,14 @@ export async function createWindowsOwnedOllamaController({
  fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head,
   ownedCalibration:true}),{flag:'wx'});
  let monitor=null,owner=null,lines=null,ownerQueue=[],ownerWaiters=[];
-  let service=null,stopped=false,sequence=0,ownerStopAck=false,providerDiagnostics=null;
+  let service=null,stopped=false,sequence=0,ownerStopAck=false,providerDiagnostics=null,providerStopReason=null;
  let ownerLaunchAttempted=false,monitorSpawnError=false;
  const pushLine=value=>{
   try{
    const message=JSON.parse(value);
    if(message.status==='OWNED_OLLAMA_STOPPED'&&message.jobClosed===true&&
       message.pid===service?.servicePid){ownerStopAck=true;
-    providerDiagnostics=safeProviderDiagnostics(message.providerDiagnostics);}
+    providerDiagnostics=safeProviderDiagnostics(message.providerDiagnostics);providerStopReason=safeStopReason(message.stopReason);}
   }catch{}
   const waiter=ownerWaiters.shift();
   if(waiter)waiter.resolve(value);else ownerQueue.push(value);
@@ -155,7 +164,7 @@ export async function createWindowsOwnedOllamaController({
  const stop=async reason=>{
   if(stopped)return {stopped:true,ownerStopConfirmed:ownerStopAck,
    monitorStopConfirmed:monitor===null||hasExited(monitor),
-   reason,servicePid:service?.servicePid,providerDiagnostics};
+   reason,servicePid:service?.servicePid,providerDiagnostics,providerStopReason};
   stopped=true;
   let ownerStopConfirmed=ownerStopAck;
   if(owner&&!hasExited(owner)){
@@ -191,7 +200,7 @@ export async function createWindowsOwnedOllamaController({
   }
   if(monitorStopConfirmed&&(owner===null||hasExited(owner)))try{removeOwnedTempDir(dir);}catch{}
   return {stopped:true,ownerStopConfirmed:ownerStopAck,monitorStopConfirmed,
-   reason,servicePid:service?.servicePid,providerDiagnostics};
+   reason,servicePid:service?.servicePid,providerDiagnostics,providerStopReason};
  };
  try{
   monitor=spawnProcess(pythonExe,[SENSOR,'--role','monitor','--folder',dir,
@@ -785,6 +794,7 @@ export function summarizeR125StudioRun(request,result,runPath,lockReleased){
   loadedModelObserved:result?.loadedModelObserved===true,
   unloadConfirmed:result?.unloadConfirmed===true,ownedServiceStopConfirmed:result?.ownedServiceStopConfirmed===true,
   monitorStopConfirmed:result?.monitorStopConfirmed===true,projectLockReleased:lockReleased===true,
+  ...(result?.ownedProviderDiagnostics!==undefined?{ownedProviderDiagnostics:result.ownedProviderDiagnostics,ownedProviderStopReason:result.ownedProviderStopReason,transportFailureCode:result.transportFailureCode,transportFailurePhase:result.transportFailurePhase,monitorStopReason:result.monitorStopReason}:{}),
   artStatus:'NOT_REVIEWED',worldContacts:0,worldWrites:0,constructionApproved:false,
   executionAllowed:false,BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED')};
 }
@@ -922,7 +932,7 @@ export async function runR125ArchitecturePlanOwned(args,{
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
  }
- let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null,attempted=false,boundedUsage=null;
+ let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null,attempted=false,boundedUsage=null,transportCode=null,transportPhase=null,monitorStopReason=null;
  const monitoredFetch=async(url,init={})=>{
   if(url!=='http://127.0.0.1:11435/v1/chat/completions'||
      init.method!=='POST'||posts!==0||(bounded&&attempted)){
@@ -972,7 +982,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   let pending=null,closed=false;
   const fault=reason=>{
    if(closed||monitorFault)return;
-   monitorFault=true;stopController.abort();
+   monitorFault=true;monitorStopReason=reason;stopController.abort();
    faultStop=Promise.resolve(service.stop(reason)).catch(()=>null);
   };
   const abortFromCaller=()=>fault('MODEL_REQUEST_ABORTED');
@@ -1003,11 +1013,11 @@ export async function runR125ArchitecturePlanOwned(args,{
    }).catch(()=>fault('RESOURCE_MONITOR_FAILED')).finally(()=>{pending=null;});
   },1000);
   try{
-   const response=await fetcher(url,{...init,signal});
+   let response;try{response=await fetcher(url,{...init,signal});}catch(error){transportCode=transportFailureCode(error);transportPhase='HEADERS';throw error;}
    if(!studio)return response;
    // Fetch resolves at headers. Keep the EXISTING monitor alive until the
    // entire response body has arrived, not just until headers are returned.
-   const raw=await response.text();
+   let raw;try{raw=await response.text();}catch(error){transportCode=transportFailureCode(error);transportPhase='BODY';throw error;}
    // Persist the received envelope before any post-response policy can reject it.
    // It is private diagnostic evidence, not an accepted SOURCE or calibration.
    if(bounded){
@@ -1065,6 +1075,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  let stop;
  try{stop=await service.stop(unloadConfirmed?'POST_COMPLETE_UNLOADED':'UNLOAD_UNCONFIRMED');}
  catch{stop=null;}
+ const failureDetails=bounded?{ownedProviderDiagnostics:safeProviderDiagnostics(stop?.providerDiagnostics),ownedProviderStopReason:safeStopReason(stop?.providerStopReason),transportFailureCode:transportCode,transportFailurePhase:transportPhase,monitorStopReason,loadedModelObserved:loadedSeen}:{};
  if(studio&&posts===0)
   return hold(result?.reason??'NO_MODEL_POST',{
    modelPostCount:0,unloadConfirmed:false,ownedServiceStopConfirmed:stop?.ownerStopConfirmed===true,
@@ -1075,11 +1086,11 @@ export async function runR125ArchitecturePlanOwned(args,{
    'MODEL_UNLOAD_UNCONFIRMED':'OWNED_SERVICE_STOP_UNCONFIRMED',{
     modelPostCount:posts,unloadConfirmed,ownedServiceStopConfirmed:stop?.ownerStopConfirmed===true,
     monitorStopConfirmed:stop?.monitorStopConfirmed===true,
-    sourceStatus:result?.status??null});
+    sourceStatus:result?.status??null,...failureDetails});
  }
  if(studio){
-  if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null});
-  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,responseFormatScope:boundedPolicy.evaluate(pre.observedResourcesMiB).responseFormatScope,boundedUsageStatus:boundedUsage?.status??null,actualTokenUsageVerified:boundedUsage?.usageVerified===true,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
+  if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null,...failureDetails});
+  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...failureDetails,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,responseFormatScope:boundedPolicy.evaluate(pre.observedResourcesMiB).responseFormatScope,boundedUsageStatus:boundedUsage?.status??null,actualTokenUsageVerified:boundedUsage?.usageVerified===true,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
  }
  try{
   const raw=fs.readFileSync(path.join(args.outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
