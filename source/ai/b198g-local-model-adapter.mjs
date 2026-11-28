@@ -610,6 +610,11 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
     ownedSchema===true&&endpoint==='http://127.0.0.1:11435/v1/chat/completions'){
   const schema=structuredClone(R125_ARCHITECTURE_RESPONSE_SCHEMA);
   if(spatialTreeOnly)schema.anyOf=[schema.anyOf[0]];
+  // Ordinary Studio briefs do not need a speculative internal staff-view
+  // relation. Constrain the authoring grammar, not the returned geometry.
+  // Explicit work-view briefs and existing revision relations retain it.
+  if(ownedSchema&&!observationRequired&&revisionBase===null)
+   for(const variant of schema.anyOf)delete variant.properties.observationLink;
   if(observationRequired){
    for(const variant of schema.anyOf){
     if(!variant.required.includes('observationLink'))
@@ -745,6 +750,7 @@ onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false,ownedSchema=fal
         revisionContext&&Object.hasOwn(revisionContext.previousArchitecturePlan,'observationLink')?
         'Preserve the useful previously authored work-view relation when still required by the project; update its room IDs if needed. Do not invent unrelated viewing relations.':
         revisionContext?'Omit observationLink: no explicit work-view request or previous work-view relation is present.':
+        ownedSchema?'Omit observationLink: this ordinary brief has no explicit internal staff-work observation requirement. Exterior scenery, daylight, lighthouse views and living spaces do not imply an internal observation link. Use actual daylight fields and preserve staff-only access.':
         allowDelegatedDimensions?'Omit observationLink unless the original request explicitly calls for visitors to watch actual staff work through an internal boundary. Ordinary shared/public rooms, bookshelves, displays, kitchens, natural light and views do not imply this relation. If explicitly requested, use adjacent same-floor public/shared viewer and staff/shared work room with a real work fixture. Otherwise use ordinary daylight and access fields.':
         'If visitors must watch actual staff WORK, not just view an exhibit, choose optional observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a work fixture. HOST cuts a real 2x2 internal glass panel and proves visitor standing access and a clear ray to work equipment; impossible choices HOLD. No automatic doors or false visibility claims. Omit for display-only requests.',
        architecturalRequest:prompt,

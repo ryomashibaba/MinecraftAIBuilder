@@ -15,6 +15,28 @@ test('arbitrary brief prepares the real owned adapter without network and change
  assert.notEqual(a.requestSha256,b.requestSha256);assert.notEqual(a.briefSha256,b.briefSha256);
  await assert.rejects(prepareR125StudioNewRequest({...input,model:'unapproved'}));
 });
+test('owned Studio wire omits speculative observation but retains explicit work-view requests',async()=>{
+ const wireFor=async prompt=>{
+  let wire;const req=await prepareR125StudioNewRequest({...input,prompt},{onWireBody:body=>{wire=body;}});
+  assert.equal(req.modelPostCount,0);
+  assert.equal(createHash('sha256').update(wire).digest('hex'),req.requestSha256);
+  return JSON.parse(wire);
+ };
+ for(const prompt of ['海を眺める窓と生活空間、灯台の操作室がある灯台守の家を設計してください。','自然光と展示室のある小さな博物館を設計してください。']){
+  const wire=await wireFor(prompt);
+  for(const v of wire.response_format.json_schema.schema.anyOf){
+   assert.equal(Object.hasOwn(v.properties,'observationLink'),false);
+   assert.equal(v.required.includes('observationLink'),false);
+   assert.equal(v.additionalProperties,false);
+  }
+  const brief=JSON.parse(wire.messages[1].content);
+  assert.equal(brief.architecturalRequest,prompt);
+  assert.match(brief.observationRelationRule,/Omit observationLink/);
+ }
+ const wire=await wireFor('来館者が職員の組立作業をガラス越しに見学できる工房を設計してください。');
+ assert.ok(wire.response_format.json_schema.schema.anyOf.every(v=>Object.hasOwn(v.properties,'observationLink')&&v.required.includes('observationLink')));
+ assert.match(JSON.parse(wire.messages[1].content).observationRelationRule,/REQUIRED BY THIS BRIEF/);
+});
 test('request mismatch and missing existing cross-project lease are pre-POST HOLD',async()=>{
  const request=await prepareR125StudioNewRequest(input);let stopped=0,posts=0;
  const controller={headSha:input.headSha,servicePid:123,checkResourceSafety(){throw Error('must not sample')},async stop(){stopped++;return {ownerStopConfirmed:true,monitorStopConfirmed:true}}};
