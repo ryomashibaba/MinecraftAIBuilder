@@ -14,6 +14,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {runR125LocalArchitecturePlan,acquireLocalTrialLock,ensurePrivateNewDirectory} from './r125-local-architecture-plan-run.mjs';
 import {createR125ArchitecturePlanLocalAdapter} from '../source/ai/b198g-local-model-adapter.mjs';
 import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
+import {createStudioBoundedPolicy} from './r125-studio-bounded-policy.mjs';
 
 const PROVIDER_DIAGNOSTIC_CLASSES=new Set(['MEMORY_ALLOCATION','GPU_RUNTIME','MODEL_RUNNER_EXIT',
  'MODEL_FILE_OR_FORMAT','REQUEST_OR_CONTEXT','MODEL_LOAD','PROVIDER_TIMEOUT']);
@@ -791,7 +792,7 @@ export function summarizeR125StudioRun(request,result,runPath,lockReleased){
 export async function runR125ArchitecturePlanOwned(args,{
  controller,calibratedResourceProbe=null,runner=runR125LocalArchitecturePlan,
  fetcher=fetch,exactRequestApprovalVerifier=null,now=()=>Date.now(),timeoutMs=180000,
- studioRequest=null,projectLease=null
+ studioRequest=null,projectLease=null,boundedStudio=null
 }={}){
  if(args?.repairOnce===true)return hold('OWNED_RUNNER_RETRY_FORBIDDEN');
  if(studioRequest===null&&(typeof args?.prompt!=='string'||!/(?:entry\s*[.:]\s*shelterDepth\s*[:=：]\s*3|entry\.shelterDepth\s*[:=：]\s*3)/i.test(args.prompt)))
@@ -803,6 +804,12 @@ export async function runR125ArchitecturePlanOwned(args,{
  const studio=studioRequest!==null;
  const expectedRequest=studio?studioRequest.requestSha256:ARCHPLAN_REQUEST_SHA256;
  let studioWireBody=null;
+ let boundedPolicy=null;
+ const bounded=boundedStudio!==null;
+ if(bounded&&!studio){
+  const stopped=await service.stop('BOUNDED_STUDIO_NEW_ONLY');
+  return hold('BOUNDED_STUDIO_NEW_ONLY',{ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
+ }
  if(studio){
   let valid=false;
   try{
@@ -819,6 +826,24 @@ export async function runR125ArchitecturePlanOwned(args,{
     monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
   }
  }
+ if(bounded){
+  try{
+   if(typeof boundedStudio.loadEvidence!=='function'||typeof boundedStudio.verifyApproval!=='function')
+    throw Error('BOUNDED_PRIVATE_BINDING_REQUIRED');
+   const evidence=await boundedStudio.loadEvidence({request:studioRequest,wireBody:studioWireBody,
+    modelDigest:MODEL_DIGEST,runtimeSha256:service.ollamaExecutableSha256,contextLength:CONTEXT_LENGTH,
+    maxOutputTokens:MAX_OUTPUT_TOKENS,responseFormat:'json_schema'});
+   if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
+   boundedPolicy=createStudioBoundedPolicy({request:studioRequest,wireBody:studioWireBody,service,evidence});
+  }catch{
+   const stopped=await service.stop('BOUNDED_PRIVATE_EVIDENCE_HOLD');
+   return hold('BOUNDED_PRIVATE_EVIDENCE_HOLD',{ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
+  }
+ }
+ const clearance=(sample,phase='PRE_POST')=>bounded
+  ?ownedSamplePass(sample,service,phase,now())&&
+   (phase!=='PRE_POST'||boundedPolicy.evaluate(sample.observedResourcesMiB).status==='ESTIMATE_ONLY')
+  :calibratedClearance(sample,service,now(),expectedRequest,studio);
  const attest=async (phase,{waitForNewSequence=false}={})=>{
   let sensor;
   const deadline=Date.now()+3000;
@@ -830,7 +855,7 @@ export async function runR125ArchitecturePlanOwned(args,{
    await delay(50);
   }
   if(studio&&!ownedSamplePass(sensor,service,phase,now()))return hold('RESOURCE_OR_HEARTBEAT_HOLD');
-  if(!calibratedResourceProbe)return sensor;
+  if(bounded||!calibratedResourceProbe)return sensor;
   const calibrated=await calibratedResourceProbe({sensor,service,phase,model:MODEL,
    headSha:service.headSha,...(studio?{architectureRequestSha256:expectedRequest,
     wireBody:studioWireBody,mode:'new'}: {})});
@@ -839,9 +864,9 @@ export async function runR125ArchitecturePlanOwned(args,{
  };
  let pre;
  try{pre=await attest('PRE_POST');}catch{pre=null;}
- if(!calibratedClearance(pre,service,now(),expectedRequest,studio)){
+ if(!clearance(pre)){
   const stopped=await service.stop('UNCALIBRATED_PRE_POST_HOLD');
-  return hold(pre?.reason??'QWEN_PEAK_CALIBRATION_REQUIRED',{
+  return hold(bounded?'BOUNDED_PRE_POST_BUDGET_OR_MONITOR_HOLD':pre?.reason??'QWEN_PEAK_CALIBRATION_REQUIRED',{
    observedResourcesMiB:pre?.observedResourcesMiB??null,
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
@@ -855,7 +880,7 @@ export async function runR125ArchitecturePlanOwned(args,{
    catch(error){
     if(!['PREFLIGHT_OWNED_TAGS_TIMEOUT','PREFLIGHT_OWNED_TAGS_CONNECTION_RESET'].includes(error?.message))throw error;
     const fresh=await attest('PRE_POST',{waitForNewSequence:true});
-    if(!calibratedClearance(fresh,service,now(),expectedRequest,studio)||
+    if(!clearance(fresh)||
        fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
     pre=fresh;
     if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
@@ -887,7 +912,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   // independently measured clearance; never extend the old one.
   if(studio){
    const fresh=await attest('PRE_POST',{waitForNewSequence:true});
-   if(!calibratedClearance(fresh,service,now(),expectedRequest,studio)||
+   if(!clearance(fresh)||
       fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
    pre=fresh;
   }
@@ -897,33 +922,41 @@ export async function runR125ArchitecturePlanOwned(args,{
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
  }
- let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null;
+ let posts=0,monitorFault=false,previous=pre,loadedSeen=false,faultStop=null,attempted=false;
  const monitoredFetch=async(url,init={})=>{
   if(url!=='http://127.0.0.1:11435/v1/chat/completions'||
-     init.method!=='POST'||posts!==0){
+     init.method!=='POST'||posts!==0||(bounded&&attempted)){
    monitorFault=true;await service.stop('REQUEST_BOUNDARY_VIOLATION');
    throw Error('OWNED_ARCHPLAN_ONE_POST_BOUNDARY');
   }
+  if(bounded)attempted=true;
   const requestSha256=createHash('sha256').update(String(init.body??'')).digest('hex');
    let outgoing;
    try{outgoing=JSON.parse(String(init.body??''));}catch{outgoing=null;}
-   if(typeof exactRequestApprovalVerifier!=='function'||
+   const verifier=bounded?boundedStudio.verifyApproval:exactRequestApprovalVerifier;
+   if(typeof verifier!=='function'||
       requestSha256!==expectedRequest||
       outgoing?.model!==MODEL||outgoing?.max_tokens!==MAX_OUTPUT_TOKENS||
-     await exactRequestApprovalVerifier({requestSha256,model:MODEL,
+     await verifier({requestSha256,model:MODEL,
        headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0,
-       purpose:'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir,
+       purpose:bounded?'ARCHITECTURE_PLAN_BOUNDED_TRIAL':'ARCHITECTURE_PLAN',...(studio?{briefSha256:studioRequest.briefSha256,outDir:args.outDir,
         mode:'new',wireBody:studioWireBody,modelDigest:MODEL_DIGEST,responseFormat:'json_schema',
          ollamaExecutableSha256:service.ollamaExecutableSha256}:{}),contextLength:CONTEXT_LENGTH,
        maxOutputTokens:MAX_OUTPUT_TOKENS,
-       calibrationProofSha256:pre.calibrationProofSha256})!==true){
+       ...(bounded?{resourceEvidenceSha256:boundedPolicy.evidenceSha256,
+        resourceBudgetMiB:boundedPolicy.evaluate(pre.observedResourcesMiB).requiredMiB,
+        inferenceMemoryPeakCalibrated:false}:{calibrationProofSha256:pre.calibrationProofSha256})})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
    throw Error('EXACT_ARCHPLAN_REQUEST_APPROVAL_REQUIRED');
   }
   if(studio){
    if(await projectLease.assertHeld()!==true)throw Error('PROJECT_LEASE_LOST');
    if(init.signal?.aborted)throw Error('MODEL_REQUEST_ABORTED');
-   if(!calibratedClearance(previous,service,now(),expectedRequest,studio))throw Error('PRE_POST_CLEARANCE_EXPIRED');
+   if(bounded){
+    const fresh=await attest('PRE_POST',{waitForNewSequence:true});
+    if(monitorFault||!clearance(fresh)||fresh.monitorSequence<=previous.monitorSequence||await projectLease.assertHeld()!==true||init.signal?.aborted)throw Error('BOUNDED_FINAL_PRE_POST_HOLD');
+    previous=fresh;
+   }else if(!clearance(previous))throw Error('PRE_POST_CLEARANCE_EXPIRED');
   }
   posts++;
   const stopController=new AbortController();
@@ -942,15 +975,19 @@ export async function runR125ArchitecturePlanOwned(args,{
   const pulse=setInterval(()=>{
    if(pending||closed)return;
    pending=Promise.resolve().then(()=>attest('DURING_INFERENCE')).then(async sample=>{
+    if(bounded&&!clearance(sample,'DURING_INFERENCE'))throw Error('BOUNDED_RESOURCE_HOLD');
     if(studio){
      const [active,shared]=await Promise.all([
       jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
       jsonObject(fetcher,'http://127.0.0.1:11434/api/ps')]);
      if(!Array.isArray(shared?.models)||shared.models.length!==0)throw Error('SHARED_SERVICE_BECAME_BUSY');
-     if(exactLoadedModel(active))loadedSeen=true;
+     if(exactLoadedModel(active)){
+       if(bounded&&!boundedPolicy.placementMatches(active.models[0]))throw Error('BOUNDED_MODEL_PLACEMENT_MISMATCH');
+       loadedSeen=true;
+      }
      else if(!Array.isArray(active?.models)||active.models.length!==0)throw Error('LOADED_MODEL_IDENTITY_MISMATCH');
     }
-    if(!calibratedClearance(sample,service,now(),expectedRequest,studio)||
+    if(!clearance(sample,'DURING_INFERENCE')||
        sample.monitorHeartbeatEpochMs<=previous.monitorHeartbeatEpochMs||
        sample.monitorSequence<=previous.monitorSequence)
      fault('RESOURCE_OR_HEARTBEAT_HOLD');
@@ -969,7 +1006,8 @@ export async function runR125ArchitecturePlanOwned(args,{
    if(pending)await pending;
    if(await projectLease.assertHeld()!==true)fault('PROJECT_LEASE_LOST');
    if(monitorFault||signal.aborted)throw Error('OWNED_MODEL_RESPONSE_INTERRUPTED');
-   return {ok:response.ok,status:response.status,json:async()=>JSON.parse(raw)};
+   if(bounded&&response.ok&&!boundedPolicy.responseWithinBound(JSON.parse(raw)))throw Error('BOUNDED_ACTUAL_TOKEN_USAGE_UNVERIFIED');
+    return {ok:response.ok,status:response.status,json:async()=>JSON.parse(raw)};
   }finally{
    clearInterval(pulse);
    if(studio&&pending)await pending;
@@ -997,7 +1035,7 @@ export async function runR125ArchitecturePlanOwned(args,{
     {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
    const body=response.ok?await response.json():null;
    unloadConfirmed=Array.isArray(body?.models)&&
-    !body.models.some(entry=>entry?.name===MODEL);
+    (bounded?body.models.length===0:!body.models.some(entry=>entry?.name===MODEL));
   }catch{}
  }
  let stop;
@@ -1017,7 +1055,7 @@ export async function runR125ArchitecturePlanOwned(args,{
  }
  if(studio){
   if(!loadedSeen)return hold('ACTUAL_LOADED_MODEL_NOT_OBSERVED',{modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,sourceStatus:result?.status??null});
-  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true};
+  return {...result,modelPostCount:posts,unloadConfirmed:true,ownedServiceStopConfirmed:true,monitorStopConfirmed:true,loadedModelObserved:true,...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceEvidenceSha256:boundedPolicy.evidenceSha256,resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false}:{})};
  }
  try{
   const raw=fs.readFileSync(path.join(args.outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
@@ -1045,7 +1083,8 @@ export function parseOwnedArgs(argv){
 }
 
 async function runOwnedCli(argv){
- const studio=argv[0]==='--studio-new';
+ const bounded=argv[0]==='--studio-new-bounded';
+ const studio=argv[0]==='--studio-new'||bounded;
  const requestSha256=studio?argv[1]:null;
  if(studio&&!SHA256_RE.test(requestSha256??''))throw Error('STUDIO_EXACT_REQUEST_SHA_REQUIRED');
  const args=parseOwnedArgs(studio?argv.slice(2):argv);
@@ -1069,8 +1108,10 @@ async function runOwnedCli(argv){
  if(actual===ROOT||actual.startsWith(ROOT+path.sep)||!fs.statSync(actual).isFile())
   throw Error('PRIVATE_MODULE_MUST_BE_EXTERNAL');
  const bindings=await import(pathToFileURL(actual).href);
- if(typeof bindings.calibratedResourceProbe!=='function'||
-    typeof bindings.verifyExactRequestApproval!=='function')
+ if(bounded&&(typeof bindings.loadStudioBoundedEvidence!=='function'||typeof bindings.verifyBoundedStudioRequestApproval!=='function'))
+  throw Error('BOUNDED_PRIVATE_BINDING_REQUIRED');
+ if(!bounded&&(typeof bindings.calibratedResourceProbe!=='function'||
+    typeof bindings.verifyExactRequestApproval!=='function'))
   throw Error('PRIVATE_CALIBRATION_AND_REQUEST_APPROVAL_REQUIRED');
  if(studio){
   const request=await prepareR125StudioNewRequest({...args,headSha:expectedHead});
@@ -1088,7 +1129,8 @@ async function runOwnedCli(argv){
     throw Error('PROJECT_MODEL_LOCK_NOT_ACQUIRED');
    controller=await createWindowsOwnedOllamaController({pythonExe,ollamaExe,expectedHead,repoRoot:ROOT});
    result=await runR125ArchitecturePlanOwned(args,{controller,studioRequest:request,projectLease:lease,
-    calibratedResourceProbe:bindings.calibratedResourceProbe,exactRequestApprovalVerifier:bindings.verifyExactRequestApproval});
+    calibratedResourceProbe:bindings.calibratedResourceProbe,exactRequestApprovalVerifier:bindings.verifyExactRequestApproval,
+    ...(bounded?{boundedStudio:{loadEvidence:bindings.loadStudioBoundedEvidence,verifyApproval:bindings.verifyBoundedStudioRequestApproval}}:{})});
   }catch(error){
    if(controller)try{await controller.stop('STUDIO_RUN_EXCEPTION');}catch{}
    result=hold(String(error?.message??'STUDIO_RUN_EXCEPTION').slice(0,160),ownedStartupSettlement(error));
@@ -1112,7 +1154,7 @@ async function runOwnedCli(argv){
       !fs.statSync(path.join(args.outDir,'B143_SOURCE_REVIEW_ONLY.json')).isFile())
     throw Error('STUDIO_RUN_ARTIFACT_MISMATCH');
   }catch{result={...result,sourceVerified:false,reason:'STUDIO_RUN_ARTIFACT_MISMATCH'};}
-  const receipt=summarizeR125StudioRun(request,result,args.outDir,released);
+  const receipt={...summarizeR125StudioRun(request,result,args.outDir,released),...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,resourceEvidenceSha256:result.resourceEvidenceSha256??null}:{})};
   console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
   return;
  }
@@ -1225,7 +1267,7 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   }else await runOwnedCli(argv);
  }
  catch(error){
-  if(['--studio-new','--prepare-studio-new'].includes(process.argv[2]))
+  if(['--studio-new','--studio-new-bounded','--prepare-studio-new'].includes(process.argv[2]))
    console.log(JSON.stringify({schema:'r125-studio-owned-result-v1',mode:'new',status:'HOLD',
     reason:String(error?.message??'R125_OWNED_ARCHPLAN_HOLD').slice(0,160),runPath:null,sourceVerified:false,
     modelPostCount:0,automaticRetries:0,worldContacts:0,worldWrites:0}));
