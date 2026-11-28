@@ -1,0 +1,25 @@
+name: V43 P0-B bounded Studio candidate — offline only
+on:
+  push:
+    branches: [research/v43-p0b-resource-budget-20261128]
+permissions:
+  contents: read
+concurrency:
+  group: v43-p0b-bounded-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  candidate-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bounded policy and unchanged owned lifecycle
+        run: |
+          node --check scripts/r125-local-architecture-plan-owned.mjs
+          node --check scripts/r125-studio-bounded-policy.mjs
+          node --test scripts/r125-studio-resource-budget.test.mjs scripts/r125-studio-bounded.test.mjs scripts/r125-studio-owned.test.mjs scripts/r125-local-architecture-plan-owned.test.mjs
