@@ -11,7 +11,7 @@ const model='qwen3:14b',runtime='d'.repeat(64),headSha='a'.repeat(40);
 const start={ramFree:14000,commitHeadroom:33000,gpuFree:16003,gpuTotal:16384};
 const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
 const original=fs.readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8');
-for(const scenario of ['success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','wrong-usage','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
+for(const scenario of ['success','cross-format-success','missing-evidence','low-budget','denied','lease-lost','post-approval-budget','during-floor','wrong-placement','wrong-usage','shared-busy'])test('bounded Studio (injected only): '+scenario,{timeout:15000},async()=>{
  const request=await prepareR125StudioNewRequest({model,prompt,headSha});
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-bounded-test-')),outDir=path.join(root,'run');
  let seq=0,posts=0,approvals=0,stops=0,loaded=false,leased=true;
@@ -25,9 +25,9 @@ for(const scenario of ['success','missing-evidence','low-budget','denied','lease
  },async stop(){stops++;loaded=false;observed();return {ownerStopConfirmed:true,monitorStopConfirmed:true}}};
  const evidence={schema:'r125-studio-bounded-private-evidence-v1',provenanceVerified:scenario!=='missing-evidence',headSha,requestSha256:request.requestSha256,
   tokenObservation:{requestSha256:request.requestSha256,modelDigest:digest,runtimeSha256:runtime,inputUpperBound:8000},
-  history:{runtimeSha256:runtime,modelDigest:digest,contextLength:16384,maxOutputTokens:4096,responseFormat:'json_schema',kvCacheType:'f16',flashAttention:false,parallel:1,maxLoadedModels:1,evidenceSha256:'b'.repeat(64),start,minimum:{ramFree:11000,commitHeadroom:22000,gpuFree:3650,gpuTotal:16384},placement:{sizeBytes:12949368339,sizeVramBytes:12949368339}}};
+  history:{runtimeSha256:runtime,modelDigest:digest,contextLength:16384,maxOutputTokens:4096,responseFormat:scenario==='cross-format-success'?'json_object':'json_schema',kvCacheType:'f16',flashAttention:false,parallel:1,maxLoadedModels:1,evidenceSha256:'b'.repeat(64),start,minimum:{ramFree:11000,commitHeadroom:22000,gpuFree:3650,gpuTotal:16384},placement:{sizeBytes:12949368339,sizeVramBytes:12949368339}}};
  const boundedStudio={async loadEvidence(x){assert.equal(x.request.requestSha256,request.requestSha256);assert.equal(sha(x.wireBody),request.requestSha256);return evidence},
- async verifyApproval(x){approvals++;assert.equal(x.purpose,'ARCHITECTURE_PLAN_BOUNDED_TRIAL');assert.equal(x.inferenceMemoryPeakCalibrated,false);assert.equal('calibrationProofSha256' in x,false);assert.equal(x.requestSha256,request.requestSha256);assert.equal(x.outDir,outDir);assert.equal(x.resourceBudgetMiB.gpuFree,15937);assert.match(x.resourceEvidenceSha256,/^[a-f0-9]{64}$/);if(scenario==='lease-lost')leased=false;return scenario!=='denied'}};
+ async verifyApproval(x){approvals++;assert.equal(x.purpose,'ARCHITECTURE_PLAN_BOUNDED_TRIAL');assert.equal(x.inferenceMemoryPeakCalibrated,false);assert.equal('calibrationProofSha256' in x,false);assert.equal(x.requestSha256,request.requestSha256);assert.equal(x.outDir,outDir);assert.equal(x.resourceBudgetMiB.gpuFree,15425);assert.equal(x.responseFormatScope,scenario==='cross-format-success'?'JSON_OBJECT_TO_JSON_SCHEMA_UNCALIBRATED':'SAME_FORMAT');assert.equal(x.resourceReserveMiB.gpuFree,512);assert.match(x.resourceEvidenceSha256,/^[a-f0-9]{64}$/);if(scenario==='lease-lost')leased=false;return scenario!=='denied'}};
  const fetcher=async(url,init)=>{
   if(init.method==='POST'){
    assert.equal(url,request.endpoint);assert.equal(sha(init.body),request.requestSha256);assert.equal(approvals,1);posts++;loaded=true;
@@ -50,8 +50,8 @@ for(const scenario of ['success','missing-evidence','low-budget','denied','lease
   const receipt=summarizeR125StudioRun(request,result,outDir,true);
   const pre=['missing-evidence','low-budget','denied','lease-lost','post-approval-budget'].includes(scenario);
   assert.equal(posts,pre?0:1);assert.equal(result.modelPostCount,posts);assert.ok(stops>=1);
-  if(scenario==='success'){
-   assert.equal(result.sourceVerified,true,JSON.stringify(result));assert.equal(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(result.resourceMode,'BOUNDED_REAL_REQUEST_TRIAL');assert.equal(result.resourceSafetyCertified,false);assert.equal(result.inferenceMemoryPeakCalibrated,false);
+  if(['success','cross-format-success'].includes(scenario)){
+   assert.equal(result.sourceVerified,true,JSON.stringify(result));assert.equal(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(result.resourceMode,'BOUNDED_REAL_REQUEST_TRIAL');assert.equal(result.responseFormatScope,scenario==='cross-format-success'?'JSON_OBJECT_TO_JSON_SCHEMA_UNCALIBRATED':'SAME_FORMAT');assert.equal(result.resourceSafetyCertified,false);assert.equal(result.inferenceMemoryPeakCalibrated,false);
    assert.ok(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')));
   }else{assert.notEqual(receipt.status,'SOURCE_READY_REVIEW_ONLY');assert.equal(receipt.runPath,null);}
   if(['missing-evidence','low-budget'].includes(scenario))assert.equal(approvals,0);
