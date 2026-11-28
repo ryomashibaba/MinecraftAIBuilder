@@ -19,7 +19,7 @@ export function createStudioBoundedPolicy({request,wireBody,service,evidence}={}
   evidenceSha256,
   evaluate,
   placementMatches(item){
-   return item?.name==='qwen3:14b'&&item.digest===digest&&item.context_length===16384&&Number.isSafeInteger(item.size)&&item.size>0&&item.size===item.size_vram&&item.size<=data.history.placement.sizeVramBytes;
+   return item?.name==='qwen3:14b'&&item.digest===digest&&item.context_length===16384&&Number.isSafeInteger(item.size)&&item.size>=9276198565&&item.size===item.size_vram&&item.size<=data.history.placement.sizeVramBytes;
   },
   responseWithinBound(value){
    const u=value?.usage;
