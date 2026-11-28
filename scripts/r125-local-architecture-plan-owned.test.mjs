@@ -447,7 +447,7 @@ for(const kind of ['TIMEOUT','CONNECTION_RESET','CONNECTION_REFUSED'])test('owne
 
 test('calibration HTTP 500 classifies bounded error stream without retaining raw text or retrying',async()=>{
  const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
- for(const [error,expected] of [['CUDA out of memory SECRET_PRIVATE_PATH','MEMORY_ALLOCATION'],['model runner process exited SECRET_PRIVATE_PATH','MODEL_RUNNER_EXIT'],['unknown SECRET_PRIVATE_PATH','OTHER_PROVIDER_ERROR'],['x'.repeat(9000),'ERROR_BODY_TOO_LARGE']]){
+ for(const [error,expected] of [['CUDA out of memory SECRET_PRIVATE_PATH','MEMORY_ALLOCATION'],['model runner process exited SECRET_PRIVATE_PATH','MODEL_RUNNER_EXIT'],['unknown SECRET_PRIVATE_PATH','OTHER_PROVIDER_ERROR'],[{message:'CUDA out of memory SECRET_PRIVATE_PATH'},'MEMORY_ALLOCATION'],[{message:'model runner process exited SECRET_PRIVATE_PATH'},'MODEL_RUNNER_EXIT'],[{code:'opaque'},'ERROR_MESSAGE_UNAVAILABLE'],['x'.repeat(9000),'ERROR_BODY_TOO_LARGE']]){
   let posts=0,checks=0;
   const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,calibrationRequestSha256:sha},{
    controller:calibrationController(async()=>sensor(++checks)),approvalVerifier:async()=>true,
