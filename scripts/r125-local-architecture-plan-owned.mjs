@@ -1190,6 +1190,12 @@ async function runOwnedCli(argv){
     throw Error('STUDIO_RUN_ARTIFACT_MISMATCH');
   }catch{result={...result,sourceVerified:false,reason:'STUDIO_RUN_ARTIFACT_MISMATCH'};}
   const receipt={...summarizeR125StudioRun(request,result,args.outDir,released),...(bounded?{resourceMode:'BOUNDED_REAL_REQUEST_TRIAL',resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,resourceEvidenceSha256:result.resourceEvidenceSha256??null,responseFormatScope:result.responseFormatScope??null,boundedUsageStatus:result.boundedUsageStatus??null,actualTokenUsageVerified:result.actualTokenUsageVerified===true}:{})};
+  // The GUI consumes stdout and shows only the HOLD reason. Preserve the
+  // sanitized settlement receipt locally so the next attempt is informed.
+  if(bounded&&result.modelPostCount===1)try{
+   if(!fs.lstatSync(args.outDir).isSymbolicLink()&&fs.statSync(args.outDir).isDirectory())
+    fs.writeFileSync(path.join(args.outDir,'BOUNDED_OWNED_RESULT.json'),JSON.stringify(receipt,null,2),{encoding:'utf8',flag:'wx',mode:0o600});
+  }catch{/* Never mask a completed SOURCE or its original failure. */}
   console.log(JSON.stringify(receipt));if(receipt.status!=='SOURCE_READY_REVIEW_ONLY')process.exitCode=2;
   return;
  }

@@ -69,7 +69,7 @@ for(const scenario of ['success','cross-format-success','missing-evidence','low-
    assert.equal(receipt.reason,'MODEL_UNLOAD_UNCONFIRMED');
    assert.equal(receipt.transportFailureCode,'UND_ERR_SOCKET');assert.equal(receipt.transportFailurePhase,'HEADERS');
    assert.equal(receipt.ownedProviderStopReason,'OWNED_OLLAMA_EXITED_UNEXPECTEDLY');
-   assert.deepEqual(receipt.ownedProviderDiagnostics,{classes:['MODEL_RUNNER_EXIT','MEMORY_ALLOCATION'],chunks:6,complete:true});
+   assert.deepEqual(receipt.ownedProviderDiagnostics,{classes:['MEMORY_ALLOCATION','MODEL_RUNNER_EXIT'],chunks:6,complete:true});
    assert.equal(receipt.unloadConfirmed,false);assert.equal(receipt.sourceVerified,false);
    assert.equal(JSON.stringify(receipt).includes('PRIVATE'),false);
   }
