@@ -505,12 +505,13 @@ export async function runR125ResourceCalibrationOwned({
     preflightJsonObject(fetcher,sharedUrl,'SHARED_PS')]);
   }else{
    // LISTENING establishes ownership, not readiness. A single bounded
-   // GET-only retry is allowed solely for the observed startup timeout.
+   // GET-only retry is allowed for observed startup timeout/reset.
    // No calibration POST, resource floor, identity check or lease is relaxed.
    try{tags=await preflightJsonObject(fetcher,tagsUrl,'OWNED_TAGS');}
    catch(error){
-    if(error?.message!=='PREFLIGHT_OWNED_TAGS_TIMEOUT')throw error;
-    report.ownedTagsInitialTimeout=true;
+    if(!['PREFLIGHT_OWNED_TAGS_TIMEOUT','PREFLIGHT_OWNED_TAGS_CONNECTION_RESET'].includes(error?.message))throw error;
+    report.ownedTagsInitialTimeout=error.message==='PREFLIGHT_OWNED_TAGS_TIMEOUT';
+     report.ownedTagsInitialFailure=error.message;
     try{await sample('PRE_POST',{waitForNewSequence:true});}
     catch(guard){return fail(guard?.message??'PRE_POST_MONITOR_SAMPLE_HOLD');}
     if(!await leaseHeld())return fail('PROJECT_LEASE_LOST');
@@ -801,7 +802,7 @@ export async function runR125ArchitecturePlanOwned(args,{
   if(studio){
    try{tags=await preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/tags','OWNED_TAGS');}
    catch(error){
-    if(error?.message!=='PREFLIGHT_OWNED_TAGS_TIMEOUT')throw error;
+    if(!['PREFLIGHT_OWNED_TAGS_TIMEOUT','PREFLIGHT_OWNED_TAGS_CONNECTION_RESET'].includes(error?.message))throw error;
     const fresh=await attest('PRE_POST',{waitForNewSequence:true});
     if(!calibratedClearance(fresh,service,now(),expectedRequest)||
        fresh.monitorSequence<=pre.monitorSequence)throw Error('RESOURCE_OR_HEARTBEAT_HOLD');
@@ -1153,6 +1154,7 @@ async function runOwnedCalibrationCli(argv){
   ownedServiceStopConfirmed:result.ownedServiceStopConfirmed,
   monitorStopConfirmed:result.monitorStopConfirmed,projectLockReleased:released,
   ownedTagsInitialTimeout:result.ownedTagsInitialTimeout===true,
+   ownedTagsInitialFailure:result.ownedTagsInitialFailure??null,
   ownedTagsReadOnlyRetrySucceeded:result.ownedTagsReadOnlyRetrySucceeded===true,
   calibrationHttpStatus:result.calibrationHttpStatus??null,
   calibrationHttpElapsedMs:result.calibrationHttpElapsedMs??null,
