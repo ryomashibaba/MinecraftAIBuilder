@@ -605,8 +605,9 @@ export function r125RevisionResponseFormat(format,previous,{observationRequired=
  if(allowed.includes('roofSurface'))constrainR125RoofSurfaceChoices(result.json_schema.schema);
  return result;
 }
-export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false,spatialTreeOnly=false,revisionBase=null}={}){
- if(endpoint==='http://127.0.0.1:11434/v1/chat/completions'){
+export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false,spatialTreeOnly=false,revisionBase=null,ownedSchema=false}={}){
+ if(endpoint==='http://127.0.0.1:11434/v1/chat/completions'||
+    ownedSchema===true&&endpoint==='http://127.0.0.1:11435/v1/chat/completions'){
   const schema=structuredClone(R125_ARCHITECTURE_RESPONSE_SCHEMA);
   if(spatialTreeOnly)schema.anyOf=[schema.anyOf[0]];
   if(observationRequired){
@@ -634,7 +635,7 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
 export function createR125ArchitecturePlanLocalAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=180000,
 reasoningEffort=undefined,maxOutputTokens=4096,spatialTreeOnly=false,onRawModelResponse,
-onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
+onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false,ownedSchema=false
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -729,7 +730,7 @@ onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.55,
      response_format:r125ResponseFormatForEndpoint(endpoint,{
-      observationRequired:r125RequiresWorkObservation(prompt),spatialTreeOnly,
+      observationRequired:r125RequiresWorkObservation(prompt),spatialTreeOnly,ownedSchema,
       revisionBase:revisionContext?.previousArchitecturePlan??null}),max_tokens:maxOutputTokens,
      ...(reasoningEffort===undefined?{}:{reasoning_effort:reasoningEffort}),
      messages:[{role:'system',content:revisionSystem},
