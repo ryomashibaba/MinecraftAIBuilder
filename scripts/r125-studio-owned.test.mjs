@@ -49,6 +49,7 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
  const loadedObserved=new Promise(resolve=>{loadedObservedResolve=resolve;});
  const controller={headSha:request.headSha,port:11435,servicePid:5001,supervisorPid:5000,
   monitorPid:4999,monitorId:'a'.repeat(32),killOnCloseJob:true,configuredContextLength:16384,
+  ollamaExecutableSha256:'d'.repeat(64),
   configuredParallelRequests:1,configuredMaxLoadedModels:1,configuredKeepAliveSeconds:0,
   cloudDisabled:true,configuredFlashAttention:false,configuredKvCacheType:'f16',
   configuredGpuOverheadBytes:0,configuredScheduleSpread:false,configuredMaxQueue:1,
@@ -65,6 +66,7 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
   return {...sensor,status:'SAFE_FOR_ONE_REQUEST',
   resourceSafetyCertified:true,inferenceMemoryPeakCalibrated:true,model:input.model,modelDigest:digest,
   contextLength:16384,maxOutputTokens:4096,calibrationProofSha256:'f'.repeat(64),
+  calibrationResponseFormat:'json_schema',calibrationOllamaExecutableSha256:controller.ollamaExecutableSha256,
   architectureRequestSha256,headSha:request.headSha,resourceCalibrationId:'injected-test-only',
   measuredAtEpochMs:Date.now(),sharedServiceIdle:true};};
  const fetcher=async(url,init)=>{
@@ -97,6 +99,7 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
    controller,studioRequest:request,projectLease:{assertHeld:async()=>true},
    calibratedResourceProbe:probe,exactRequestApprovalVerifier:async x=>{
     approval++;return hash(x.wireBody)===request.requestSha256&&x.mode==='new'&&x.modelDigest===digest&&
+     x.responseFormat==='json_schema'&&x.ollamaExecutableSha256===controller.ollamaExecutableSha256&&
      x.requestSha256===request.requestSha256&&x.headSha===request.headSha&&
      x.briefSha256===request.briefSha256&&x.outDir===outDir;
    },fetcher});
