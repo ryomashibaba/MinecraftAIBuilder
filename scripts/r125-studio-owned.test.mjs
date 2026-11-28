@@ -11,7 +11,7 @@ test('arbitrary brief prepares the real owned adapter without network and change
  const a=await prepareR125StudioNewRequest(input,{onWireBody:body=>{wire=body;}}),b=await prepareR125StudioNewRequest({...input,prompt:'町の小さな図書館を作ってください。'});
  assert.equal(a.modelPostCount,0);assert.equal(a.headSha,input.headSha);
  assert.equal(createHash('sha256').update(wire).digest('hex'),a.requestSha256);
- assert.equal(JSON.parse(wire).model,input.model);assert.equal('wireBody' in a,false);
+ assert.equal(JSON.parse(wire).model,input.model);assert.equal(JSON.parse(wire).response_format.type,'json_schema');assert.equal('wireBody' in a,false);
  assert.notEqual(a.requestSha256,b.requestSha256);assert.notEqual(a.briefSha256,b.briefSha256);
  await assert.rejects(prepareR125StudioNewRequest({...input,model:'unapproved'}));
 });
@@ -69,7 +69,7 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
   measuredAtEpochMs:Date.now(),sharedServiceIdle:true};};
  const fetcher=async(url,init)=>{
   if(init.method==='POST'){
-   assert.equal(url,request.endpoint);assert.equal(hash(init.body),request.requestSha256);posts++;loaded=true;
+   assert.equal(url,request.endpoint);assert.equal(hash(init.body),request.requestSha256);assert.equal(JSON.parse(init.body).response_format.type,'json_schema');posts++;loaded=true;
    return {ok:true,status:200,async text(){
     let timer;try{await Promise.race([loadedObserved,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('TEST_MONITOR_NOT_OBSERVED')),4000)})]);}
     finally{clearTimeout(timer);}
@@ -106,6 +106,7 @@ for(const startupFailure of [null,'TIMEOUT','CONNECTION_RESET'])test('Studio own
   const saved=JSON.parse(fs.readFileSync(path.join(outDir,'RUN_REPORT.json'),'utf8'));
   const receipt=summarizeR125StudioRun(request,result,outDir,true);
   assert.equal(receipt.status,'SOURCE_READY_REVIEW_ONLY');
+  assert.equal(saved.requestedGenerationSettings.responseFormat,'json_schema');
   assert.equal(receipt.sourceSha256,saved.sourceSha256);assert.equal(receipt.geometrySha256,saved.geometrySha256);
   assert.equal(fs.readFileSync(path.join(outDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
   assert.ok(fs.existsSync(path.join(outDir,'B143_SOURCE_REVIEW_ONLY.json')));
