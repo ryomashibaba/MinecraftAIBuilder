@@ -325,6 +325,39 @@ const preflightJsonObject=async(fetcher,url,endpoint,timeoutMs=5000)=>{
  }
 };
 
+// Read a bounded error envelope in memory, retaining ONLY fixed diagnostic
+// categories. Never persist or print raw provider error text, prompt or paths.
+async function classifyCalibrationHttpFailure(response){
+ let reader,timer;
+ try{
+  if(typeof response?.body?.getReader!=='function')return 'ERROR_BODY_UNAVAILABLE';
+  reader=response.body.getReader();
+  const read=async()=>{
+   const chunks=[];let size=0;
+   for(;;){
+    const {done,value}=await reader.read();
+    if(done)break;
+    if(!(value instanceof Uint8Array))return 'ERROR_BODY_UNAVAILABLE';
+    size+=value.byteLength;
+    if(size>8192)return 'ERROR_BODY_TOO_LARGE';
+    chunks.push(Buffer.from(value));
+   }
+   let error;
+   try{error=JSON.parse(Buffer.concat(chunks).toString('utf8'))?.error;}catch{return 'ERROR_BODY_NOT_JSON';}
+   if(typeof error!=='string')return 'ERROR_MESSAGE_UNAVAILABLE';
+   if(/out of memory|not enough memory|insufficient (?:gpu |system )?memory|failed to allocate|cuda_error_out_of_memory/i.test(error))return 'MEMORY_ALLOCATION';
+   if(/(?:cuda|cublas|gpu|vulkan|rocm).*(?:error|failed|unavailable|not found)|(?:error|failed).*\b(?:cuda|cublas|gpu|vulkan|rocm)\b/i.test(error))return 'GPU_RUNTIME';
+   if(/runner.*(?:terminated|exited|crashed|died|stopped|failed to start)|(?:exit status|process terminated)/i.test(error))return 'MODEL_RUNNER_EXIT';
+   if(/(?:model|manifest|blob|gguf).*(?:not found|no such file|invalid|corrupt|failed to open)/i.test(error))return 'MODEL_FILE_OR_FORMAT';
+   if(/(?:context length|context window|token limit|response.format|json schema|invalid request|unsupported)/i.test(error))return 'REQUEST_OR_CONTEXT';
+   if(/(?:failed to load|error loading|unable to load).*model|model.*(?:failed to load|loading failed)/i.test(error))return 'MODEL_LOAD';
+   return 'OTHER_PROVIDER_ERROR';
+  };
+  return await Promise.race([read(),new Promise(resolve=>{timer=setTimeout(()=>resolve('ERROR_BODY_TIMEOUT'),1500);})]);
+ }catch{return 'ERROR_BODY_UNAVAILABLE';}
+ finally{clearTimeout(timer);if(reader)try{void reader.cancel().catch(()=>{});}catch{}}
+}
+
 export function validateCalibrationRequest({body,expectedSha256}={}){
  let raw;
  try{raw=JSON.stringify(body);}catch{return {valid:false,reason:'REQUEST_NOT_JSON'};}
@@ -560,10 +593,12 @@ export async function runR125ResourceCalibrationOwned({
   headers:{'Content-Type':'application/json'},signal:abort.signal,
   body:JSON.stringify(request.body)})).then(async response=>{
    if(!response?.ok){
-    // Preserve the numeric HTTP status in the PRIVATE failure receipt.
-    // Never persist the response body (it may include private model data).
+    // Preserve only numeric status, timing and a bounded fixed category.
+    // Raw provider error content is never written to receipts or stdout.
     report.calibrationHttpStatus=Number.isInteger(response?.status)&&
      response.status>=100&&response.status<=599?response.status:null;
+    report.calibrationHttpElapsedMs=Math.max(0,now()-started);
+    report.calibrationHttpErrorClass=await classifyCalibrationHttpFailure(response);
     throw Error('CALIBRATION_POST_HTTP_FAILED');
    }
    const raw=await response.text();
@@ -1118,7 +1153,10 @@ async function runOwnedCalibrationCli(argv){
   ownedServiceStopConfirmed:result.ownedServiceStopConfirmed,
   monitorStopConfirmed:result.monitorStopConfirmed,projectLockReleased:released,
   ownedTagsInitialTimeout:result.ownedTagsInitialTimeout===true,
-  ownedTagsReadOnlyRetrySucceeded:result.ownedTagsReadOnlyRetrySucceeded===true,worldWrites:0}));
+  ownedTagsReadOnlyRetrySucceeded:result.ownedTagsReadOnlyRetrySucceeded===true,
+  calibrationHttpStatus:result.calibrationHttpStatus??null,
+  calibrationHttpElapsedMs:result.calibrationHttpElapsedMs??null,
+  calibrationHttpErrorClass:result.calibrationHttpErrorClass??null,worldWrites:0}));
  if(result.status!=='CALIBRATION_PASS')process.exitCode=2;
 }
 

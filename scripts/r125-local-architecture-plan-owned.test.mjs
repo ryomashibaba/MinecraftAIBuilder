@@ -130,6 +130,7 @@ test('calibration POST HTTP failure records status without response content or r
  assert.equal(result.status,'HOLD');
  assert.equal(result.reason,'CALIBRATION_POST_HTTP_FAILED');
  assert.equal(result.calibrationHttpStatus,503);
+ assert.equal(result.calibrationHttpErrorClass,'ERROR_BODY_UNAVAILABLE');
  assert.equal(result.modelPostCount,1);
  assert.equal(result.automaticRetries,0);
  assert.equal(posts,1);
@@ -436,5 +437,25 @@ test('owned tags startup timeout permits one guarded GET retry, never a model re
    'low-resource':'PRE_POST_RESOURCE_FLOOR_HOLD'})[scenario]);
   assert.equal(result.ownedTagsInitialTimeout,true);
   assert.equal(result.ownedTagsReadOnlyRetrySucceeded===true,scenario==='recover');
+ }
+});
+
+
+test('calibration HTTP 500 classifies bounded error stream without retaining raw text or retrying',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ for(const [error,expected] of [['CUDA out of memory SECRET_PRIVATE_PATH','MEMORY_ALLOCATION'],['model runner process exited SECRET_PRIVATE_PATH','MODEL_RUNNER_EXIT'],['unknown SECRET_PRIVATE_PATH','OTHER_PROVIDER_ERROR'],['x'.repeat(9000),'ERROR_BODY_TOO_LARGE']]){
+  let posts=0,checks=0;
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,calibrationRequestSha256:sha},{
+   controller:calibrationController(async()=>sensor(++checks)),approvalVerifier:async()=>true,
+   fetcher:async(url,init={})=>{
+    if(init.method!=='POST')return calibrationPreflightFetcher(url,init);
+    posts++;return new Response(JSON.stringify({error}),{status:500});
+   },pollMs:250,timeoutMs:5000});
+  assert.equal(result.reason,'CALIBRATION_POST_HTTP_FAILED');assert.equal(result.status,'HOLD');
+  assert.equal(result.calibrationHttpStatus,500);assert.equal(result.calibrationHttpErrorClass,expected);
+  assert.ok(Number.isFinite(result.calibrationHttpElapsedMs));
+  assert.equal(posts,1);assert.equal(result.modelPostCount,1);assert.equal(result.automaticRetries,0);
+  assert.equal(JSON.stringify(result).includes('SECRET_PRIVATE_PATH'),false);
+  assert.equal(result.ownedServiceStopConfirmed,true);assert.equal(result.monitorStopConfirmed,true);
  }
 });
